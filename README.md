@@ -268,7 +268,7 @@ HTML 파일 내 지도 API Key 교체가 필요합니다.
 ### 5. Admin Access
 관리자 권한 부여 SQL:
 ```SQL
-UPDATE USERS SET ROLE = 'ADMIN' WHERE EMAIL = 'admin@wegive.com';
+UPDATE USERS SET ROLE = 'ADMIN' WHERE EMAIL = ${YOUR_EMAIL};
 COMMIT;
 ```
 
@@ -286,7 +286,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 * **Developer**: [SUNGHO CHOI]
 * **Email**: `csh6170@gmail.com`
-* **GitHub**: [https://github.com/csh6170/wegive](https://github.com/csh6170/wegive)
+* **GitHub**: [https://github.com/csh6170/wg](https://github.com/csh6170/wg)
 
 <br>
 
