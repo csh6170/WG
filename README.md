@@ -47,7 +47,7 @@
 
 ### 1. 관심 상품 및 찜하기 (`Wish Domain`)
 `WishlistController`, `WishlistService`, `WishlistRepository`를 통해 사용자의 관심사를 관리하고 인기 지표를 제공합니다.
-* **Toggle Mechanism**: `toggleWishlist` 메서드에서 DB 조회를 통해 이미 찜한 상태면 **삭제(취소)**하고, 없으면 **저장(찜하기)**하는 토글 로직을 구현했습니다.
+* **Toggle Mechanism**: `toggleWishlist` 메서드에서 DB 조회를 통해 이미 찜한 상태면 **삭제(취소)** 하고, 없으면 **저장(찜하기)** 하는 토글 로직을 구현했습니다.
 * **Duplicate Prevention**: DB 레벨에서 `UniqueConstraint(USER_ID, ITEM_ID)`를 걸어 동일 상품에 대한 중복 찜 등록을 원천 차단했습니다.
 * **Real-time Count**: `Item` 엔티티의 `@Formula`를 통해 조회 시점의 찜 개수를 서브쿼리로 가져오거나, 서비스 레이어에서 `countByItem`을 호출하여 실시간 인기를 반영합니다.
 * **Candidate Filtering**: 나눔이(판매자)는 자신의 물건을 찜한 사용자 목록(`findByItem`)을 조회하여 잠재적인 나눔 대상자를 파악할 수 있습니다.
@@ -83,7 +83,7 @@
 
 * **반경 기반 물품 필터링 (Distance Filter)**
     * **현황**: 마이페이지 내 **Kakao Local API를 활용한 위치 인증(위도/경도 저장 및 행정동 변환)** 기능은 성공적으로 구현하여 사용자의 실제 거주지를 확보했습니다.
-    * **보완점**: 메인 피드에서 **"내 위치 기준 반경 1km/2km 이내"**의 물품만 필터링하여 보여주는 기능은 구현하지 못했습니다.
+    * **보완점**: 메인 피드에서 **"내 위치 기준 반경 1km/2km 이내"** 의 물품만 필터링하여 보여주는 기능은 구현하지 못했습니다.
     * **계획**: 추후 Oracle Spatial 기능 또는 Haversine 공식을 QueryDSL/JPQL에 적용하여, 단순 최신순 정렬이 아닌 **사용자 거리 기반의 정교한 필터링 로직**을 도입할 예정입니다.
 
 ---
@@ -229,7 +229,7 @@ src/main
 ## ⚙️ Getting Started
 
 ### 1. Configuration (application.yaml)
-로컬 환경에 맞게 application.yaml 파일을 설정해야 합니다.
+로컬 환경에 맞게 **application.yaml** 파일을 설정해야 합니다.
 ```YAML
 # Database (Oracle XE)
 spring:
@@ -268,7 +268,7 @@ HTML 파일 내 지도 API Key 교체가 필요합니다.
 ### 5. Admin Access
 관리자 권한 부여 SQL:
 ```SQL
-UPDATE USERS SET ROLE = 'ADMIN' WHERE EMAIL = 'admin@wegive.com';
+UPDATE USERS SET ROLE = 'ADMIN' WHERE EMAIL = ${YOUR_EMAIL};
 COMMIT;
 ```
 
@@ -286,7 +286,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 * **Developer**: [SUNGHO CHOI]
 * **Email**: `csh6170@gmail.com`
-* **GitHub**: [https://github.com/csh6170/wegive](https://github.com/csh6170/wegive)
+* **GitHub**: [https://github.com/csh6170/wg](https://github.com/csh6170/wg)
 
 <br>
 
@@ -296,4 +296,4 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 **© 2026 WEGIVE Project. All Rights Reserved.**
 <br>
-`Copyright (c) 2026 SUNGHO CHOI`
+Copyright (c) 2026 SUNGHO CHOI
