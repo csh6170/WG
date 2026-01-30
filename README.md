@@ -235,26 +235,26 @@ src/main
 spring:
   datasource:
     url: jdbc:oracle:thin:@localhost:1521:XE
-    username: ${YOUR_USERNAME}
-    password: ${YOUR_PASSWORD}
+    username: YOUR_KEY
+    password: YOUR_KEY
 
 # OAuth2 Keys
 oauth:
   naver:
-    client-id: ${YOUR_NAVER_CLIENT_ID}
-    client-secret: ${YOUR_NAVER_CLIENT_SECRET}
+    client-id: YOUR_KEY
+    client-secret: YOUR_KEY
   google:
-    client-id: ${YOUR_GOOGLE_CLIENT_ID}
-    client-secret: ${YOUR_GOOGLE_CLIENT_SECRET}
+    client-id: YOUR_KEY
+    client-secret: YOUR_KEY
 ```
 
 ### 2. Frontend API Keys
 HTML 파일 내 지도 API Key 교체가 필요합니다.
 
-- Target Files: item-form.html, item-edit.html, header.html
 - Kakao Maps SDK:
-  ```HTML
-  <script src="//dapi.kakao.com/...appkey=YOUR_KEY..."></script>
+  ```YAML
+  js:
+  kakao: YOUR_KEY
   ```
 
 ### 3. Database Initialization

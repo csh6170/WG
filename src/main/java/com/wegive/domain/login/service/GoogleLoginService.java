@@ -82,7 +82,7 @@ public class GoogleLoginService {
         userInfo.put("email", jsonNode.get("email").asText());
 
         // [수정] 프로필 이미지 기본값 처리 로직 추가
-        String profileImage = "/images/default_profile.png"; // 1. 기본값 설정
+        String profileImage = "https://github.com/user-attachments/assets/774a82da-80c5-40ca-af9e-35b1bb980ffb"; // 1. 기본값 설정
 
 //        if (jsonNode.has("picture")) {
 //            String googleImg = jsonNode.get("picture").asText();

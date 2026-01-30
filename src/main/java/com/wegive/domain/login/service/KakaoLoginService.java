@@ -82,7 +82,7 @@ public class KakaoLoginService {
 
         // 닉네임과 프로필 사진 기본값 설정
         String nickname = "익명 사용자";
-        String profileImage = "/images/default_profile.png"; // 1. 기본 이미지로 시작
+        String profileImage = "https://github.com/user-attachments/assets/774a82da-80c5-40ca-af9e-35b1bb980ffb"; // 1. 기본 이미지로 시작
 
         if (kakaoAccount != null && kakaoAccount.has("profile")) {
             JsonNode profile = kakaoAccount.get("profile");

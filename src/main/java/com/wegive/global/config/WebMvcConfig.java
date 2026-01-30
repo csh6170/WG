@@ -24,6 +24,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
         // 실제로는 "file:///G:/wegive_uploads/" 폴더를 찾아가라!
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("file:///" + fileDir);
+        registry.addResourceHandler("/**")
+                .addResourceLocations("classpath:/static/");
     }
     // [추가된 코드] 인터셉터 등록
     @Override

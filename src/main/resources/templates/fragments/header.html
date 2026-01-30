@@ -80,10 +80,10 @@
 
     <script th:inline="javascript">
         // --- [로그인/로그아웃 로직] ---
-        const KAKAO_CLIENT_ID = "${YOUR_KAKAO_CLIENT_ID}";
-        const NAVER_CLIENT_ID = "${YOUR_NAVER_CLIENT_ID}";
-        const GOOGLE_CLIENT_ID = "${YOUR_GOOGLE_CLIENT_ID}";
-        const REDIRECT_URI_BASE = "${YOUR_REDIRECT_URI}";
+        const KAKAO_CLIENT_ID = [[${@environment.getProperty('kakao.rest-api-key')}]];
+        const NAVER_CLIENT_ID = [[${@environment.getProperty('oauth.naver.client-id')}]];
+        const GOOGLE_CLIENT_ID = [[${@environment.getProperty('oauth.google.client-id')}]];
+        const REDIRECT_URI_BASE = [[${@environment.getProperty('redirect.uri.base')}]];
 
         function kakaoLogin() { location.href = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${REDIRECT_URI_BASE}/kakao&response_type=code`; }
         function naverLogin() {

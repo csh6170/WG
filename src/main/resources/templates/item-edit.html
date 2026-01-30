@@ -253,7 +253,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${YOUR_KAKAO_KEY}&libraries=services"></script>
+<script type="text/javascript"
+        th:src="|//dapi.kakao.com/v2/maps/sdk.js?appkey=${@environment.getProperty('js.kakao')}&libraries=services|"></script>
 
 <script>
     /* 지도 설정 및 초기화 (수정 페이지 전용 로직 유지) */

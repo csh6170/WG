@@ -251,7 +251,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${YOUR_KAKAO_KEY}&libraries=services"></script>
+<script type="text/javascript"
+        th:src="|//dapi.kakao.com/v2/maps/sdk.js?appkey=${@environment.getProperty('js.kakao')}&libraries=services|"></script>
 
 <script>
     /* ⚠️ [확인] 사용자님 요청에 따라 원본 로직을 100% 그대로 유지했습니다.

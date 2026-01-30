@@ -9,8 +9,8 @@ spring:
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver # Oracle DB와 연결하기 위한 JDBC 드라이버 지정
     url: jdbc:oracle:thin:@localhost:1521:XE   # DB 접속 주소 (Local Oracle XE 버전)
-    username: ${YOUR_USERNAME}                 # DB 접속 계정명
-    password: ${YOUR_PASSWORD}                 # DB 접속 비밀번호
+    username: YOUR_KEY                 # DB 접속 계정명
+    password: YOUR_KEY                 # DB 접속 비밀번호
 
   # [2] JPA 및 Hibernate(ORM) 설정
   jpa:
@@ -48,15 +48,22 @@ file:
 
 # [소셜 로그인 설정]
 kakao:
-  rest-api-key: ${YOUR_KAKAO_REST_API_KEY}
-  redirect-uri: ${YOUR_REDIRECT_URI}
+  rest-api-key: YOUR_KEY
+  redirect-uri: http://localhost:8080/login/oauth2/code/kakao
 
 oauth:
   naver:
-    client-id: ${YOUR_NAVER_CLIENT_ID}
-    client-secret: ${YOUR_NAVER_CLIENT_SECRET}
-    redirect-uri: ${YOUR_REDIRECT_URI}
+    client-id: YOUR_KEY
+    client-secret: YOUR_KEY
+    redirect-uri: http://localhost:8080/login/oauth2/code/naver
   google:
-    client-id: ${YOUR_GOOGLE_CLIENT_ID}
-    client-secret: ${YOUR_GOOGLE_CLIENT_SECRET}
-    redirect-uri: ${YOUR_REDIRECT_URI}
+    client-id: YOUR_KEY
+    client-secret: YOUR_KEY
+    redirect-uri: http://localhost:8080/login/oauth2/code/google
+
+redirect:
+  uri:
+    base: http://localhost:8080/login/oauth2/code
+
+js:
+  kakao: YOUR_KEY
