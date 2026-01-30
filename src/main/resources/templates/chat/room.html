@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Wegive 채팅</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/header.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        /* 🌿 테마 시스템 (item-detail.html과 동일) */
+        :root {
+            --sage-green: #5a8d7a;
+            --warm-coral: #ff7e67;
+            --cream-bg: #fdfcf9;
+            --text-main: #374151;
+            --chat-my-bg: #5a8d7a;      /* 내 메시지 배경 (세이지 그린) */
+            --chat-other-bg: #f3f4f6;   /* 상대 메시지 배경 (연회색) */
+        }
+
+        body {
+            background-color: var(--cream-bg);
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            color: var(--text-main);
+            padding-bottom: 50px;
+        }
+
+        /* 📍 메인 레이아웃 (1000px 중앙 정렬) */
+        .main-wrapper {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        /* 채팅방 전체 컨테이너 (흰색 카드 디자인) */
+        .chat-room-card {
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            border: 1px solid rgba(90, 141, 122, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 75vh; /* 화면의 75% 높이 차지 */
+            min-height: 500px;
+        }
+
+        /* 1. 채팅 헤더 (상품 정보) */
+        .chat-header {
+            padding: 15px 25px;
+            border-bottom: 1px solid #f0f0f0;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .item-info-box { display: flex; align-items: center; cursor: pointer; }
+        .item-thumb {
+            width: 50px; height: 50px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 1px solid #eee;
+            margin-right: 15px;
+        }
+        .item-text { display: flex; flex-direction: column; }
+        .item-title { font-weight: 800; font-size: 1rem; color: #2d4a3e; margin-bottom: 2px; }
+        .item-status { font-size: 0.85rem; }
+
+        .status-ing { color: var(--sage-green); font-weight: 700; }
+        .status-done { color: #999; text-decoration: line-through; }
+        .status-reserved { color: #ffc107; font-weight: 700; }
+
+        /* 2. 채팅 영역 (스크롤) */
+        .chat-container {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            background-color: #f9fbfb; /* 아주 연한 세이지 틴트 배경 */
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        /* 스크롤바 커스텀 */
+        .chat-container::-webkit-scrollbar { width: 6px; }
+        .chat-container::-webkit-scrollbar-thumb { background-color: #d1d5db; border-radius: 10px; }
+
+        /* 메시지 스타일 */
+        .message-wrapper { display: flex; flex-direction: column; max-width: 70%; }
+
+        .message-box {
+            padding: 12px 18px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            position: relative;
+            word-break: break-all;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+
+        /* 내 메시지 (오른쪽, 세이지 그린) */
+        .my-message {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+        .my-message .message-box {
+            background-color: var(--chat-my-bg);
+            color: white;
+            border-bottom-right-radius: 4px; /* 말풍선 모양 */
+        }
+
+        /* 상대 메시지 (왼쪽, 회색) */
+        .other-message {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+        .other-message .message-box {
+            background-color: var(--chat-other-bg);
+            color: #333;
+            border: 1px solid #e5e7eb;
+            border-bottom-left-radius: 4px; /* 말풍선 모양 */
+        }
+        .sender-name {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-bottom: 5px;
+            margin-left: 5px;
+            font-weight: 600;
+        }
+
+        /* 3. 입력창 영역 */
+        .chat-input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .chat-input-area input {
+            border-radius: 25px;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 12px 20px;
+            flex-grow: 1;
+        }
+        .chat-input-area input:focus {
+            outline: none;
+            border-color: var(--sage-green);
+            box-shadow: 0 0 0 3px rgba(90, 141, 122, 0.1);
+        }
+        .btn-send {
+            background-color: var(--sage-green);
+            color: white;
+            border: none;
+            border-radius: 50%; /* 원형 버튼 */
+            width: 48px;
+            height: 48px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(90, 141, 122, 0.2);
+        }
+        .btn-send:hover { background-color: #4a7565; transform: scale(1.05); }
+        .btn-send:disabled { background-color: #ccc; transform: none; }
+
+        /* 버튼 커스텀 (헤더용) */
+        .btn-action-coral {
+            background-color: var(--warm-coral);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+        }
+        .btn-action-outline {
+            border: 1px solid #d1d5db;
+            color: #6b7280;
+            background: white;
+            border-radius: 10px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .main-wrapper { margin: 0; padding: 0; }
+            .chat-room-card {
+                height: calc(100vh - 60px); /* 헤더 제외 높이 */
+                border-radius: 0;
+                border: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div th:replace="~{fragments/header :: header}"></div>
+</div>
+
+<div class="main-wrapper">
+    <div class="chat-room-card">
+
+        <div class="chat-header">
+            <th:block th:if="${item != null and item.status != 'DELETE'}">
+                <div class="item-info-box" th:onclick="|location.href='/items/${item.itemId}'|">
+                    <img th:src="${#lists.isEmpty(item.imageUrls) ? 'https://dummyimage.com/100x100/f0f0f0/999999.png?text=No+Image' : '/images/' + item.imageUrls[0]}"
+                         class="item-thumb">
+                    <div class="item-text">
+                        <span class="item-title" th:text="${item.title}">상품 제목</span>
+                        <span class="item-status">
+                            <span th:if="${item.status == 'AVAILABLE'}" class="status-ing">나눔중</span>
+                            <span th:if="${item.status == 'RESERVED'}" class="status-reserved">예약중</span>
+                            <span th:if="${item.status == 'COMPLETED'}" class="status-done">나눔완료</span>
+                            <span class="text-secondary opacity-50 mx-1">|</span>
+                            <span th:text="${item.category}" class="text-muted">카테고리</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 align-items-center">
+                    <button th:if="${item.sellerId == myUserId and item.status == 'AVAILABLE'}"
+                            onclick="completeTrade()"
+                            class="btn-action-coral">
+                        <i class="bi bi-check-circle-fill"></i> 나눔완료
+                    </button>
+
+                    <button th:if="${item.buyerId == myUserId and item.status == 'COMPLETED' and !item.isReviewed}"
+                            onclick="openReviewModal()"
+                            class="btn-action-coral">
+                        <i class="bi bi-pencil-fill"></i> 나눔 받기 완료
+                    </button>
+
+                    <a th:unless="${(item.sellerId == myUserId and item.status == 'AVAILABLE') or (item.buyerId == myUserId and item.status == 'COMPLETED' and !item.isReviewed)}"
+                       th:href="|/items/${item.itemId}|"
+                       class="btn-action-outline">
+                        게시글 <i class="bi bi-chevron-right"></i>
+                    </a>
+
+                    <button type="button" class="btn btn-light btn-sm text-danger rounded-circle border"
+                            style="width:36px; height:36px;"
+                            title="상대방 신고하기" onclick="openReportModal()">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </button>
+                </div>
+            </th:block>
+
+            <th:block th:if="${item == null or item.status == 'DELETE'}">
+                <div class="item-info-box" style="cursor: default;">
+                    <img src="https://dummyimage.com/100x100/f0f0f0/999999.png?text=Deleted" class="item-thumb">
+                    <div class="item-text">
+                        <span class="item-title text-secondary">삭제된 게시글입니다.</span>
+                        <span class="item-status text-muted">정보를 불러올 수 없습니다.</span>
+                    </div>
+                </div>
+            </th:block>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+            <div th:each="msg : ${messages}"
+                 th:class="${msg.senderId == myUserId} ? 'message-wrapper my-message' : 'message-wrapper other-message'">
+                <span th:if="${msg.senderId != myUserId}" class="sender-name" th:text="${msg.senderNickname}">상대방</span>
+                <div class="message-box" th:text="${msg.message}">대화 내용</div>
+            </div>
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" id="msgInput"
+                   th:placeholder="${(item == null or item.status == 'DELETE')} ? '삭제된 게시글입니다.' : (${item.status == 'COMPLETED'} ? '나눔이 완료되어 대화가 종료되었습니다.' : '따뜻한 대화를 나눠보세요.')"
+                   th:disabled="${item == null or item.status == 'DELETE' or item.status == 'COMPLETED'}"
+                   onkeyup="if(window.event.keyCode==13){sendMsg()}">
+
+            <button class="btn-send"
+                    onclick="sendMsg()"
+                    th:disabled="${item == null or item.status == 'DELETE' or item.status == 'COMPLETED'}">
+                <i class="bi bi-send-fill"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 20px; border:none;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-danger">🚨 사용자 신고</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="chatReportForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">사유 선택</label>
+                        <select class="form-select" id="chatReportReason" style="border-radius: 10px;">
+                            <option value="ABUSIVE">욕설/비방/성희롱</option>
+                            <option value="FRAUD">사기 의심</option>
+                            <option value="OTHER">기타</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">상세 내용</label>
+                        <textarea class="form-control" id="chatReportDesc" rows="3" placeholder="내용을 입력해주세요." style="border-radius: 10px;"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-danger rounded-pill px-4" onclick="submitChatReport()">신고하기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+<script th:inline="javascript">
+    /* 기존 로직 100% 유지 */
+    const roomId = [[${roomId}]];
+    const myUserId = [[${myUserId}]];
+    const itemId = [[${item != null ? item.itemId : 0}]];
+    const chatPartnerId = [[${partnerId}]];
+
+    let stompClient = null;
+
+    connect();
+
+    function connect() {
+        const socket = new SockJS('/ws-stomp');
+        stompClient = Stomp.over(socket);
+        stompClient.debug = null;
+
+        stompClient.connect({}, function (frame) {
+            stompClient.subscribe('/sub/chat/room/' + roomId, function (chatMessage) {
+                showChat(JSON.parse(chatMessage.body));
+            });
+            scrollToBottom();
+        });
+    }
+
+    function sendMsg() {
+        const input = document.getElementById('msgInput');
+        const content = input.value.trim();
+
+        if(content) {
+            stompClient.send("/pub/chat/message", {}, JSON.stringify({
+                roomId: roomId,
+                senderId: myUserId,
+                message: content
+            }));
+            input.value = '';
+        }
+    }
+
+    function showChat(message) {
+        const chatContainer = document.getElementById('chatContainer');
+
+        // 🔴 서버에서 보낸 종료 신호 감지 시 즉시 UI 차단
+        if (message.message === "STATUS_CHANGED_TO_COMPLETED") {
+            disableChatInput("나눔이 완료되어 대화가 종료되었습니다.");
+            return;
+        }
+
+        let html = '';
+        if (message.senderId === myUserId) {
+            html = `<div class="message-wrapper my-message">
+                        <div class="message-box">${message.message}</div>
+                    </div>`;
+        } else {
+            html = `<div class="message-wrapper other-message">
+                        <span class="sender-name">${message.senderNickname}</span>
+                        <div class="message-box">${message.message}</div>
+                    </div>`;
+        }
+        chatContainer.insertAdjacentHTML('beforeend', html);
+        scrollToBottom();
+    }
+
+    // 입력 필드와 버튼을 비활성화하는 헬퍼 함수
+    function disableChatInput(placeholderText) {
+        const input = document.getElementById('msgInput');
+        const btn = document.querySelector('.btn-send');
+
+        if (input) {
+            input.disabled = true;
+            input.placeholder = placeholderText;
+        }
+        if (btn) {
+            btn.disabled = true;
+        }
+    }
+
+    function scrollToBottom() {
+        const chatContainer = document.getElementById('chatContainer');
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // 나눔 완료 기능
+    function completeTrade() {
+        Swal.fire({
+            title: '이 사람에게 나눔을 하시겠습니까?',
+            text: "완료 후에는 취소할 수 없습니다.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '네, 완료합니다',
+            confirmButtonColor: '#5a8d7a', // 테마 컬러 적용
+            cancelButtonText: '취소'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/api/items/${itemId}/status?status=COMPLETED&buyerId=${chatPartnerId}`, {
+                    method: 'PATCH'
+                })
+                .then(res => {
+                    if (res.ok) {
+                        Swal.fire('완료!', '나눔이 확정되었습니다.', 'success')
+                        .then(() => location.reload());
+                    } else {
+                        res.text().then(msg => Swal.fire('오류', msg, 'error'));
+                    }
+                });
+            }
+        });
+    }
+
+    // 후기 작성 기능
+    function openReviewModal() {
+        Swal.fire({
+            title: '나눔은 어떠셨나요?',
+            text: "나눔 받기 완료를 하시면 상대방의 매너온도가 올라갑니다!",
+            icon: 'heart', // icon 지원 여부 확인 필요하지만 보통 success/info 씀
+            showCancelButton: true,
+            confirmButtonText: '최고예요! 👍',
+            confirmButtonColor: '#ff7e67', // 웜 코랄 적용
+            cancelButtonText: '닫기'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/api/items/${itemId}/review`, { method: 'POST' })
+                .then(async res => {
+                    const msg = await res.text();
+                    if (res.ok) {
+                        Swal.fire('전송 완료', msg, 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('실패', msg, 'error');
+                    }
+                });
+            }
+        });
+    }
+
+    /* 신고 스크립트 */
+    function openReportModal() {
+        const modal = new bootstrap.Modal(document.getElementById('reportModal'));
+        modal.show();
+    }
+
+    function submitChatReport() {
+        const reason = document.getElementById('chatReportReason').value;
+        const description = document.getElementById('chatReportDesc').value;
+
+        const data = {
+            reportedUserId: chatPartnerId,
+            itemId: itemId || 0,
+            reason: reason,
+            description: description + ` (채팅방 ID: ${roomId})`
+        };
+
+        fetch(`/api/reports?userId=${myUserId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(res => {
+            if (res.ok) {
+                Swal.fire('접수 완료', '신고가 접수되었습니다.', 'success').then(() => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('reportModal'));
+                    modal.hide();
+                    document.getElementById('chatReportForm').reset();
+                });
+            } else {
+                Swal.fire('오류', '신고 접수에 실패했습니다.', 'error');
+            }
+        });
+    }
+</script>
+</body>
+</html>

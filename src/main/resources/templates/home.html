@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Wegive - 따뜻한 나눔</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        /* 기본 배경 및 폰트 설정 */
+        body {
+            background-color: #fdfcf9; /* 따뜻한 크림색 배경 */
+            color: #374151;
+            font-family: 'Pretendard', -apple-system, sans-serif;
+        }
+
+        /* 히어로 섹션 (이미지 느낌의 배너 추가) */
+        .hero-banner {
+            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
+                        url('https://images.unsplash.com/photo-1556745753-b2904692b3cd?auto=format&fit=crop&w=1200&q=80'); /* 나눔 이미지 */
+            background-size: cover;
+            background-position: center;
+            border-radius: 2rem;
+            padding: 60px 20px;
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .hero-banner h1 { font-weight: 800; font-size: 2.5rem; margin-bottom: 15px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .hero-banner .btn-coral { background-color: #ff7e67; border: none; color: white; padding: 12px 30px; border-radius: 25px; font-weight: bold; }
+
+        /* 나눔 카드 디자인 (이미지 형태 반영) */
+        .card {
+            border: none;
+            border-radius: 1.5rem;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); /* 부드러운 그림자 */
+            transition: all 0.3s ease;
+        }
+        .card:hover { transform: translateY(-10px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        .card-img-top { border-radius: 1.5rem 1.5rem 0 0; height: 200px; }
+
+        /* 텍스트 및 위치 정보 */
+        .item-title { color: #2d4a3e; font-weight: 700; } /* 세이지 그린 톤 */
+        .item-addr {
+            color: #6b7280;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+
+            /* 핵심 추가 속성 */
+            max-width: 70%;       /* 부모 공간의 70%까지만 차지 (나머지는 조회수 공간) */
+            white-space: nowrap;  /* 줄바꿈 강제 금지 */
+            overflow: hidden;     /* 넘치는 텍스트 숨김 */
+        }
+        .item-addr span {
+            overflow: hidden;
+            text-overflow: ellipsis; /* 넘치면 ... 처리 */
+            white-space: nowrap;
+        }
+        .item-addr i {
+            flex-shrink: 0;
+            color: #5a8d7a;
+        }
+
+        /* 📍 카테고리 배지: 더 둥글고 은은한 세이지 톤으로 변경 */
+        .category-badge {
+            background-color: #e8f3ef; /* 연한 세이지 그린 */
+            color: #5a8d7a;           /* 메인 세이지 그린 */
+            border: none;             /* 테두리 제거로 깔끔하게 */
+            border-radius: 8px;       /* 약간 둥근 직사각형 */
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        /* 글쓰기 버튼 (+) */
+        .write-btn {
+            background: linear-gradient(135deg, #5a8d7a, #4a7565);
+            box-shadow: 0 8px 16px rgba(90, 141, 122, 0.3);
+        }
+        /* 📍 상태 배지 (예약중/나눔완료): 카드 이미지 위에 올라가는 스타일 */
+        .status-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            z-index: 2;
+        }
+
+        /* 예약중: 테마의 메인인 세이지 그린 적용 */
+        .bg-reserved {
+            background-color: #5a8d7a;
+            opacity: 0.95;
+        }
+
+        /* 나눔완료: 차분한 웜그레이 적용 */
+        .bg-completed {
+            background-color: #6b7280;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mb-5">
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <div class="row mb-4 g-2">
+        <div class="col-4 col-md-3">
+            <select id="categorySelect" class="form-select shadow-sm border-0" onchange="searchItems()" style="border-radius: 0.75rem;">
+                <option value="">전체 카테고리</option>
+                <option value="디지털/가전">디지털/가전</option>
+                <option value="가구/인테리어">가구/인테리어</option>
+                <option value="생활/가공식품">생활/가공식품</option>
+                <option value="의류/잡화">의류/잡화</option>
+                <option value="도서/티켓/음반">도서/티켓/음반</option>
+                <option value="기타">기타</option>
+            </select>
+        </div>
+        <div class="col-8 col-md-9">
+            <div class="input-group shadow-sm" style="border-radius: 0.75rem; overflow: hidden;">
+                <input type="text" id="keywordInput" class="form-control border-0" placeholder="어떤 나눔을 찾으세요?"
+                       onkeyup="if(window.event.keyCode==13){searchItems()}">
+                <button class="btn btn-light border-start" type="button" onclick="resetSearch()" title="검색 초기화">
+                    <i class="bi bi-arrow-counterclockwise text-secondary"></i>
+                </button>
+                <button class="btn btn-primary px-4" onclick="searchItems()"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+        <div class="hero-banner">
+            <h1>가까운 이웃과 나눠보세요</h1>
+            <p class="fs-5">우리 동네의 따뜻한 나눔 플랫폼, WeGive</p>
+            <button class="btn btn-coral mt-3" onclick="location.href='/items/new'">지금 나눔하기</button>
+        </div>
+    </div>
+
+    <h3 class="fw-bold mb-4 ps-1" style="color: #374151;">🔥 방금 올라온 나눔</h3>
+
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4" id="itemList">
+    </div>
+
+    <div class="text-center mt-5 mb-5">
+        <button id="loadMoreBtn" class="btn btn-outline-primary rounded-pill px-5 py-2 shadow-sm fw-bold"
+                onclick="loadMore()" style="display: none;">
+            더보기 <i class="bi bi-chevron-down"></i>
+        </button>
+    </div>
+
+    <div id="noResult" class="text-center w-100 mt-5 py-5" style="display: none;">
+        <div style="font-size: 4rem;">🌱</div>
+        <h4 class="fw-bold mt-3 text-dark">조건에 맞는 나눔이 없어요</h4>
+        <p class="text-secondary">다른 검색어로 찾아보시겠어요?</p>
+    </div>
+
+</div>
+
+<a th:if="${session.userId != null}" href="/items/new" class="btn write-btn text-white text-decoration-none" title="나눔하기">+</a>
+<a sec:authorize="hasRole('ADMIN')" href="/admin"
+   class="btn btn-dark text-white text-decoration-none shadow"
+   title="관리자 페이지"
+   style="position: fixed; bottom: 110px; right: 37px; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 1000;">
+    <i class="bi bi-shield-lock-fill fs-5"></i>
+</a>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const currentUserId = [[${session.userId}]]; // 세션 ID 가져오기
+    /*]]>*/
+
+    // ==========================================
+    //  페이징 및 검색 로직 (수정됨)
+    // ==========================================
+    let currentPage = 0;   // 현재 페이지 번호
+    let isLastPage = false; // 마지막 페이지인지 여부
+    let isLoading = false; // 중복 요청 방지
+
+    document.addEventListener("DOMContentLoaded", () => {
+        // 1. 기존 로직: 초기 아이템 로딩
+        loadItems(true);
+
+        // 2. [추가] 로그인 차단 알림 체크 로직 호출
+        checkLoginError();
+
+        // 3. [추가] 신고 결과 알림 체크 (로그인 한 경우만)
+        if (currentUserId) {
+            checkReportNotifications();
+        }
+    });
+    /**
+     * URL 파라미터 체크 및 알림/모달 표시
+     * (banned, login_required, access_denied 처리)
+     */
+    function checkLoginError() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+
+        // 1. 이용 정지된 계정 알림
+        if (error === 'banned') {
+            Swal.fire({
+                icon: 'error',
+                title: '🚫 이용 정지된 계정',
+                html: '관리자에 의해 <b>서비스 이용이 제한</b>되었습니다.<br>로그인할 수 없습니다.',
+                confirmButtonColor: '#d33',
+                confirmButtonText: '확인',
+                allowOutsideClick: false // 배경 클릭해서 닫기 방지
+            }).then(() => {
+                // 알림 확인 후 URL 깔끔하게 정리
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+            });
+        }
+        // 2. [추가] 로그인 필요 시 모달 자동 오픈 (Spring Security 연동)
+        else if (error === 'login_required') {
+            Swal.fire({
+                icon: 'warning',
+                title: '로그인이 필요합니다',
+                text: '해당 기능을 이용하시려면 먼저 로그인해주세요.',
+                showCancelButton: true,
+                confirmButtonText: '로그인',
+                cancelButtonText: '취소'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // 로그인 모달 열기 (Bootstrap Modal API)
+                    // home.html이나 header fragment에 id="loginModal"인 모달이 있어야 합니다.
+                    const modalEl = document.getElementById('loginModal');
+                    if (modalEl) {
+                        const modal = new bootstrap.Modal(modalEl);
+                        modal.show();
+                    }
+                }
+            });
+            // URL 정리
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        // 3. [추가] 권한 없음 (일반 유저가 관리자 페이지 접근 등)
+        else if (error === 'access_denied') {
+            Swal.fire({
+                icon: 'error',
+                title: '접근 거부',
+                text: '해당 페이지에 접근할 권한이 없습니다.'
+            });
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }
+
+    // 검색/필터 변경 시 호출
+    function searchItems() {
+        loadItems(true);
+    }
+
+    // 초기화 버튼
+    function resetSearch() {
+        document.getElementById('categorySelect').value = '';
+        document.getElementById('keywordInput').value = '';
+        loadItems(true);
+    }
+
+    // 더보기 버튼 클릭 시 호출
+    function loadMore() {
+        if (!isLastPage && !isLoading) {
+            loadItems(false);
+        }
+    }
+
+    /**
+     * 상품 로딩 함수
+     * @param {boolean} isReset - true면 목록을 싹 비우고 처음부터(0페이지) 로딩
+     */
+    function loadItems(isReset) {
+    if (isLoading) return;
+    isLoading = true;
+
+    const category = document.getElementById('categorySelect').value;
+    const keyword = document.getElementById('keywordInput').value;
+    const list = document.getElementById('itemList');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    const noResult = document.getElementById('noResult');
+
+    // 리셋이면 페이지 0으로 초기화
+    if (isReset) {
+        currentPage = 0;
+        isLastPage = false;
+        list.innerHTML = '';
+        noResult.style.display = 'none';
+        loadMoreBtn.style.display = 'none';
+    }
+
+    // 페이지 요청 URL 생성 (Slice 처리)
+    let url = `/api/items?page=${currentPage}&size=8`; // 8개씩 로딩
+    if (category) url += `&category=${category}`;
+    if (keyword) url += `&keyword=${keyword}`;
+
+    fetch(url)
+        .then(res => res.json())
+        .then(slice => {
+            const items = slice.content;
+            isLastPage = slice.last;
+
+            if (isReset && items.length === 0) {
+                noResult.style.display = 'block';
+            } else {
+                noResult.style.display = 'none';
+                renderItems(items);
+            }
+
+            // 마지막 페이지가 아니면 더보기 버튼 표시
+            if (!isLastPage) {
+                loadMoreBtn.style.display = 'inline-block';
+                currentPage++; // 다음 로딩을 위해 페이지 증가
+            } else {
+                loadMoreBtn.style.display = 'none';
+            }
+        })
+        .catch(err => console.error(err))
+        .finally(() => {
+            isLoading = false;
+        });
+}
+
+    // 아이템 그리기 함수 내부
+    function renderItems(items) {
+        const list = document.getElementById('itemList');
+
+        items.forEach(item => {
+            let imgUrl = 'https://dummyimage.com/600x400/f0f0f0/999999.png?text=No+Image';
+            if (item.imageUrls && item.imageUrls.length > 0) {
+                imgUrl = '/images/' + item.imageUrls[0];
+            }
+
+            // 📍 수정된 배지 로직: span 태그에 status-badge 클래스 추가
+            let badgeHtml = '';
+            if (item.status === 'RESERVED') {
+                badgeHtml = '<span class="status-badge bg-reserved">예약중</span>';
+            } else if (item.status === 'COMPLETED') {
+                badgeHtml = '<span class="status-badge bg-completed">나눔완료</span>';
+            }
+
+            const html = `
+                <div class="col">
+                    <div class="card h-100" onclick="location.href='/items/${item.itemId}'">
+                        <div style="position: relative;">
+                            <img src="${imgUrl}" class="card-img-top" alt="상품이미지" style="filter: ${item.status === 'COMPLETED' ? 'grayscale(40%)' : 'none'}">
+                            ${badgeHtml}
+                        </div>
+                        <div class="card-body">
+                            <span class="category-badge mb-2 d-inline-block">${item.category}</span>
+                            <h5 class="item-title text-truncate">${item.title}</h5>
+                            <p class="item-desc text-muted small text-truncate">${item.description}</p>
+
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div class="item-addr" title="${item.addressName}"> <i class="bi bi-geo-alt-fill"></i>
+                                    <span>${item.addressName}</span>
+                                </div>
+                                <small class="text-muted flex-shrink-0">👀 ${item.viewCount}</small>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>`;
+            list.insertAdjacentHTML('beforeend', html);
+        });
+    }
+
+    function checkReportNotifications() {
+        fetch(`/api/reports/notifications?userId=${currentUserId}`)
+            .then(res => res.json())
+            .then(messages => {
+                if (messages && messages.length > 0) {
+                    // 알림이 여러 개일 수 있으니 하나씩 띄우거나, 묶어서 보여줍니다.
+                    // 여기선 간단하게 첫 번째 알림만 SweetAlert로 띄우거나 줄바꿈으로 합칩니다.
+                    const fullMsg = messages.join('<br><br>');
+
+                    Swal.fire({
+                        title: '📢 신고 처리 결과',
+                        html: fullMsg, // 줄바꿈 적용됨
+                        icon: 'info',
+                        confirmButtonText: '확인'
+                    });
+                }
+            })
+            .catch(err => console.error("알림 확인 실패:", err));
+    }
+</script>
+</body>
+</html>

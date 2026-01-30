@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>마이페이지 - Wegive</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <style>
+        :root {
+            --sage-green: #5a8d7a;
+            --soft-sage: #e8f3ef;
+            --warm-coral: #ff7e67;
+            --cream-white: #fdfcf9;
+            --text-main: #2d4a3e;
+        }
+
+        body { background-color: var(--cream-white); padding-top: 20px; padding-bottom: 50px; font-family: 'Pretendard', sans-serif; }
+
+        .profile-card {
+            background: white; border-radius: 25px; padding: 40px 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03); text-align: center; margin-bottom: 30px;
+            border: 1px solid rgba(90, 141, 122, 0.1);
+        }
+        .profile-img-container { position: relative; width: 110px; height: 110px; margin: 0 auto 15px; cursor: pointer; }
+        .profile-img { width: 100%; height: 100%; border-radius: 35px; object-fit: cover; border: 4px solid var(--soft-sage); transition: all 0.3s ease; }
+        .profile-img-container:hover .profile-img { opacity: 0.7; filter: brightness(0.8); }
+        .profile-img-container::after {
+            content: "변경"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: white; font-weight: bold; opacity: 0; transition: all 0.3s ease;
+        }
+        .profile-img-container:hover::after { opacity: 1; }
+
+        .temp-bar-bg { width: 100%; height: 6px; background: #eee; border-radius: 10px; overflow: hidden; margin-top: 5px; }
+        .temp-bar-fill { height: 100%; background: var(--sage-green); border-radius: 10px; transition: width 0.5s ease; }
+
+        .nav-tabs .nav-link.active { background: var(--sage-green) !important; color: white !important; }
+        .item-thumb { width: 75px; height: 75px; border-radius: 18px; object-fit: cover; }
+
+        .status-select-custom {
+            appearance: none; -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%235a8d7a' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 10px 10px;
+            border-radius: 12px; border: 2px solid var(--sage-green); color: var(--sage-green);
+            font-size: 0.85rem; font-weight: 700; padding: 5px 25px 5px 10px; cursor: pointer; background-color: white;
+        }
+
+        .footer-links { margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; }
+        .btn-logout { color: #888; text-decoration: none; font-weight: 600; margin-right: 20px; }
+        .btn-withdraw {
+            color: var(--warm-coral); border: 1.5px solid var(--warm-coral);
+            padding: 6px 15px; border-radius: 12px; font-size: 0.85rem;
+            font-weight: 700; text-decoration: none; transition: all 0.3s;
+        }
+        .btn-withdraw:hover { background: var(--warm-coral); color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container" style="max-width: 800px;">
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <div class="profile-card">
+        <div class="profile-img-container" onclick="document.getElementById('profileInput').click()">
+            <img th:src="${data.profileImg != null ? data.profileImg : '/images/default_profile.png'}" class="profile-img" alt="프로필">
+        </div>
+        <input type="file" id="profileInput" style="display: none;" accept="image/*" onchange="uploadProfileImage(this)">
+
+        <div class="d-flex align-items-center justify-content-center mb-2">
+            <h3 class="fw-bold mb-0 me-2" id="nicknameDisplay" th:text="${data.nickname}">사용자</h3>
+            <button type="button" class="btn btn-link p-0 text-decoration-none" onclick="editNickname()">
+                <i class="bi bi-pencil-square" style="color: var(--sage-green); font-size: 1.2rem;"></i>
+            </button>
+        </div>
+
+        <div class="mb-4">
+            <span class="badge" style="background-color: var(--soft-sage); color: var(--text-main); font-size: 0.9rem; padding: 8px 15px; border-radius: 12px;">
+                <i class="bi bi-geo-alt-fill" style="color: var(--sage-green);"></i>
+                <span th:text="${data.addressName != null ? data.addressName : '동네 인증 필요'}">역삼동</span>
+                <button class="btn btn-link p-0 ms-2 text-decoration-none fw-bold" onclick="verifyLocation()"
+                        style="color: var(--sage-green); font-size: 0.8rem;">
+                    <i class="bi bi-arrow-clockwise"></i> 재인증
+                </button>
+            </span>
+        </div>
+
+        <div class="manner-section mx-auto" style="max-width: 200px;">
+            <div class="d-flex justify-content-between small fw-bold">
+                <span style="color: #888;">매너온도</span>
+                <span style="color: var(--sage-green);"><span th:text="${data.mannerTemp}">36.5</span>℃</span>
+            </div>
+            <div class="temp-bar-bg">
+                <div class="temp-bar-fill" th:style="|width: ${data.mannerTemp}%|"></div>
+            </div>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs nav-fill mb-4" id="myTab" role="tablist">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#share">📦 나의 나눔</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#received">🎁 받은 내역</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#wish">❤️ 관심 목록</button></li>
+    </ul>
+
+    <div class="tab-content bg-white p-4 shadow-sm" style="border-radius: 20px;">
+        <div class="tab-pane fade show active" id="share" role="tabpanel">
+            <div th:if="${#lists.isEmpty(data.mySharingItems)}" class="text-center py-5">
+                <div style="font-size: 3rem;">🌱</div>
+                <p class="text-muted fw-bold">아직 나눔한 물품이 없어요.</p>
+                <a href="/items/new" class="btn text-white px-4 fw-bold" style="background: var(--sage-green); border-radius: 15px;">나눔 시작하기</a>
+            </div>
+            <ul class="list-group list-group-flush" th:unless="${#lists.isEmpty(data.mySharingItems)}">
+                <li class="list-group-item d-flex gap-3 align-items-center" th:each="item : ${data.mySharingItems}" th:if="${item.status != 'DELETE' and item.status != 'HIDDEN'}">
+                    <img th:src="${#lists.isEmpty(item.imageUrls) ? 'https://dummyimage.com/100x100/f0f0f0/999999.png?text=No+Image' : '/images/' + item.imageUrls[0]}" class="item-thumb">
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="item-title m-0 text-truncate" style="max-width: 200px; cursor: pointer;" th:text="${item.title}" th:onclick="|location.href='@{/items/{id}(id=${item.itemId})}'|">제목</h5>
+                            <div th:if="${item.status != 'COMPLETED'}">
+                                <select class="status-select-custom" th:onchange="|changeStatus(${item.itemId}, this.value)|">
+                                    <option value="AVAILABLE" th:selected="${item.status == 'AVAILABLE'}">나눔중</option>
+                                    <option value="RESERVED" th:selected="${item.status == 'RESERVED'}">예약중</option>
+                                </select>
+                            </div>
+                            <span th:if="${item.status == 'COMPLETED'}" class="badge rounded-pill px-3 py-2" style="background: #f0f0f0; color: #aaa;">나눔완료</span>
+                        </div>
+                        <div class="mt-2 small fw-bold text-muted" th:text="${#temporals.format(item.createdAt, 'yyyy-MM-dd')}">날짜</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="tab-pane fade" id="received" role="tabpanel">
+            <div th:if="${#lists.isEmpty(data.myReceivedItems)}" class="text-center py-5 text-muted">
+                <div style="font-size: 3rem;">🎁</div>
+                <p class="fw-bold">나눔 받은 내역이 아직 없네요.</p>
+            </div>
+            <ul class="list-group list-group-flush" th:unless="${#lists.isEmpty(data.myReceivedItems)}">
+                <li class="list-group-item d-flex gap-3 align-items-center" th:each="item : ${data.myReceivedItems}">
+                    <img th:src="${#lists.isEmpty(item.imageUrls) ? '/images/no_image.png' : '/images/' + item.imageUrls[0]}" class="item-thumb">
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h5 class="item-title m-0" th:text="${item.title}">제목</h5>
+                                <p class="text-muted m-0 small mt-1 fw-bold">
+                                    <span th:text="${item.sellerNickname}" style="color: var(--sage-green);">나눔이</span>님에게 선물받음
+                                </p>
+                            </div>
+                            <button th:if="${!item.isReviewed}" class="btn btn-sm px-3 fw-bold" style="background: var(--warm-coral); color: white; border-radius: 12px; border: none;" th:onclick="|sendThanks(${item.itemId})|">
+                                <i class="bi bi-heart-fill"></i> 나눔받기 완료
+                            </button>
+                            <span th:if="${item.isReviewed}" class="text-muted small fw-bold">
+                                <i class="bi bi-check-circle-fill" style="color: var(--sage-green);"></i> 나눔 받기 완료
+                            </span>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="tab-pane fade" id="wish" role="tabpanel">
+            <div th:if="${#lists.isEmpty(data.myWishes)}" class="text-center py-5 text-muted">
+                <div style="font-size: 3rem;">❤️</div>
+                <p class="fw-bold">찜한 나눔이 없어요.</p>
+            </div>
+            <ul class="list-group list-group-flush" th:unless="${#lists.isEmpty(data.myWishes)}">
+                <li class="list-group-item d-flex justify-content-between align-items-center" th:each="wish : ${data.myWishes}" th:id="'wish-item-' + ${wish.itemId}">
+                    <div style="cursor: pointer;" th:onclick="|location.href='@{/items/{id}(id=${wish.itemId})}'|">
+                        <h5 class="item-title m-0" th:text="${wish.itemTitle}">제목</h5>
+                        <small class="text-muted fw-bold" th:text="|찜한 날짜: ${#temporals.format(wish.createdAt, 'yyyy-MM-dd')}|">날짜</small>
+                    </div>
+                    <button class="btn btn-outline-danger btn-sm rounded-pill border-0 fw-bold" th:onclick="|cancelWish(${wish.itemId})|">삭제</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="text-center footer-links">
+        <a href="/logout" class="btn-logout">로그아웃</a>
+        <a href="#" onclick="withdrawUser()" class="btn-withdraw">
+            <i class="bi bi-person-x-fill"></i> 회원 탈퇴
+        </a>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script th:inline="javascript">
+    const userId = [[${session.userId}]];
+
+    // 📍 동네 재인증 로직 (JS는 기존대로 유지하되, 서버에서 addressName을 갱신해줘야 함)
+    function verifyLocation() {
+        if (!navigator.geolocation) return Swal.fire('오류', '위치 정보를 지원하지 않는 브라우저입니다.', 'error');
+        Swal.fire({ title: '위치 확인 중...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                fetch(`/api/users/${userId}/location?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`, { method: 'PATCH' })
+                .then(res => { if (res.ok) return res.text(); throw new Error(); })
+                .then(msg => Swal.fire({ icon: 'success', title: '인증 완료!', text: msg, confirmButtonColor: '#5a8d7a' }).then(() => location.reload()))
+                .catch(() => Swal.fire('실패', '위치 인증에 실패했습니다.', 'error'));
+            },
+            () => Swal.fire('실패', '위치 권한을 허용해주세요.', 'warning')
+        );
+    }
+
+    function editNickname() {
+        const nicknameEl = document.getElementById('nicknameDisplay');
+        const currentName = nicknameEl ? nicknameEl.innerText : "";
+
+        Swal.fire({
+            title: '닉네임 변경',
+            input: 'text',
+            inputValue: currentName,
+            showCancelButton: true,
+            confirmButtonText: '변경',
+            cancelButtonText: '취소',
+            confirmButtonColor: '#5a8d7a',
+            inputValidator: (value) => {
+                if (!value) return '닉네임을 입력해주세요!';
+                if (value.length > 10) return '닉네임은 10자 이내로 입력해주세요!';
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const newNickname = result.value;
+
+                // 📍 [추가 1] 변경 사항이 없는 경우 (현재 닉네임과 동일)
+                if (newNickname === currentName) {
+                    return Swal.fire({
+                        icon: 'info',
+                        title: '변경 취소',
+                        text: '현재 닉네임과 동일합니다.',
+                        confirmButtonColor: '#5a8d7a'
+                    });
+                }
+
+                // 📍 [추가 2] 에러 핸들링 로직 복구
+                fetch(`/api/users/${userId}/nickname?nickname=${newNickname}`, { method: 'PATCH' })
+                .then(async res => {
+                    if (res.ok) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '변경 완료',
+                            confirmButtonColor: '#5a8d7a'
+                        }).then(() => location.reload());
+                    } else {
+                        // 서버에서 보낸 에러 메시지 받아서 출력
+                        const errorMsg = await res.text();
+                        Swal.fire({
+                            icon: 'warning',
+                            title: '변경 실패',
+                            text: errorMsg || '닉네임 변경 중 오류가 발생했습니다.', // 메시지가 비어있을 경우 대비
+                            confirmButtonColor: '#5a8d7a'
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    Swal.fire('오류', '서버 통신 중 문제가 발생했습니다.', 'error');
+                });
+            }
+        });
+    }
+
+    function uploadProfileImage(input) {
+        if (!input.files || !input.files[0]) return;
+        const formData = new FormData();
+        formData.append('profileImage', input.files[0]);
+        fetch(`/api/users/${userId}/profileImage`, { method: 'POST', body: formData })
+        .then(res => { if (res.ok) location.reload(); });
+    }
+
+    function cancelWish(itemId) {
+        fetch(`/api/wishes/item/${itemId}?userId=${userId}`, { method: 'POST' })
+        .then(res => {
+            if(res.ok) {
+                const listItem = document.getElementById('wish-item-' + itemId);
+                if (listItem) listItem.remove();
+                if(document.querySelectorAll('#wish .list-group-item').length === 0) location.reload();
+            }
+        });
+    }
+
+    function sendThanks(itemId) {
+        Swal.fire({
+            title: '나눔 받기 완료', text: "나눔 잘 받으셨나요?", icon: 'question',
+            showCancelButton: true, confirmButtonText: '네', confirmButtonColor: '#5a8d7a'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/api/items/${itemId}/review`, { method: 'POST' })
+                .then(res => { if (res.ok) location.reload(); });
+            }
+        });
+    }
+
+    function changeStatus(itemId, newStatus) {
+        fetch(`/api/items/${itemId}/status?status=${newStatus}`, { method: 'PATCH' })
+        .then(res => { if (res.ok) location.reload(); });
+    }
+
+    function withdrawUser() {
+        Swal.fire({
+            title: '정말 탈퇴하시겠습니까?', icon: 'warning',
+            showCancelButton: true, confirmButtonColor: '#ff7e67', confirmButtonText: '탈퇴하기'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/api/users/${userId}`, { method: 'DELETE' })
+                .then(res => { if (res.ok) location.href = '/'; });
+            }
+        });
+    }
+</script>
+</body>
+</html>

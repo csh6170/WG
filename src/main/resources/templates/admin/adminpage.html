@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Wegive 관리자 - 따뜻한 관리</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <style>
+        /* 🌿 테마 시스템 반영 */
+        :root {
+            --sage-green: #5a8d7a;
+            --sage-dark: #4a7565;
+            --soft-sage: #e8f3ef;
+            --warm-coral: #ff7e67;
+            --cream-bg: #fdfcf9;
+            --text-main: #374151;
+        }
+
+        body {
+            background-color: var(--cream-bg);
+            color: var(--text-main);
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            margin: 0;
+            padding-bottom: 50px;
+        }
+
+        /* 📍 main-wrapper (1000px) 레이아웃 적용 */
+        .main-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 사이드바를 상단 탭/메뉴 형태로 변경하여 1000px 레이아웃 유지 */
+        .admin-nav {
+            background-color: white;
+            border-radius: 1.5rem;
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            border: 1px solid var(--soft-sage);
+        }
+
+        .admin-nav a {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            color: var(--text-main);
+            text-decoration: none;
+            border-radius: 1rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .admin-nav a:hover {
+            background-color: var(--soft-sage);
+            color: var(--sage-green);
+        }
+
+        .admin-nav a.active {
+            background-color: var(--sage-green);
+            color: white;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            border: none;
+            height: 100%;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .border-sage { border-left: 5px solid var(--sage-green) !important; }
+        .border-coral { border-left: 5px solid var(--warm-coral) !important; }
+
+        h3 {
+            font-weight: 800;
+            color: var(--sage-green);
+            margin-bottom: 25px;
+        }
+
+        .btn-exit {
+            color: var(--warm-coral);
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper mt-5">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <p class="text-muted mb-1">Wegive 관리자 시스템</p>
+            <h3>관리자 대시보드 🌱</h3>
+        </div>
+        <div class="text-end">
+            <span class="d-block mb-2">반갑습니다, <strong th:text="${nickname}">관리자</strong>님!</span>
+            <a href="/" class="btn-exit"><i class="bi bi-box-arrow-left"></i> 사이트로 나가기</a>
+        </div>
+    </div>
+
+    <div class="admin-nav">
+        <a href="/admin/dashboard" class="active"><i class="bi bi-speedometer2"></i> 대시보드</a>
+        <a href="/admin/users"><i class="bi bi-people-fill"></i> 회원 관리</a>
+        <a href="/admin/items"><i class="bi bi-box-seam"></i> 상품 관리</a>
+        <a href="/admin/reports"><i class="bi bi-exclamation-triangle"></i> 신고 관리</a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="stat-card border-sage">
+                <p class="text-muted mb-1">총 회원수</p>
+                <h2 class="fw-bold mb-0" th:text="${totalUsers} + '명'">0명</h2>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card border-sage">
+                <p class="text-muted mb-1">오늘 올라온 나눔</p>
+                <h2 class="fw-bold mb-0" th:text="${todayItems} + '개'">0개</h2>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card border-coral">
+                <p class="text-muted mb-1">미처리 신고건</p>
+                <h2 class="fw-bold mb-0" th:text="${pendingReports} + '건'">0건</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5 p-5 border-dashed text-center" style="border: 2px dashed #ddd; border-radius: 2rem;">
+        <p class="text-muted mb-0">준비 중인 통계 영역입니다.</p>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>500 - 서버 오류 - Wegive</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        /* home.html 테마 시스템 반영 */
+        :root {
+            --sage-green: #5a8d7a;
+            --warm-coral: #ff7e67;
+            --cream-bg: #fdfcf9;
+            --text-main: #374151;
+        }
+
+        body {
+            background-color: #fffaf9; /* 코랄 테마에 맞춘 미세한 웜톤 배경 */
+            color: var(--text-main);
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* main-wrapper (1000px) 레이아웃 적용 */
+        .main-wrapper {
+            max-width: 1000px;
+            width: 100%;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .error-card {
+            background: white;
+            padding: 60px 40px;
+            border-radius: 2rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); /* 부드러운 그림자 */
+            border: 1px solid rgba(255, 126, 103, 0.1);
+        }
+
+        .error-code {
+            font-size: 8rem;
+            font-weight: 900;
+            color: var(--warm-coral); /* 웜 코랄 적용 */
+            line-height: 1;
+            margin-bottom: 10px;
+            opacity: 0.2;
+        }
+
+        .error-message {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #2d4a3e;
+            margin-bottom: 25px;
+        }
+
+        .error-detail {
+            background-color: #fff5f3;
+            color: var(--warm-coral);
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 126, 103, 0.2);
+        }
+
+        .btn-sage {
+            background-color: var(--sage-green); /* 세이지 그린 적용 */
+            border: none;
+            color: white;
+            padding: 14px 40px;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-sage:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(90, 141, 122, 0.4);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div class="main-wrapper">
+    <div class="error-card">
+        <div class="error-code">500</div>
+        <div style="font-size: 4rem; margin-bottom: 20px;">🚨</div>
+        <div class="error-message">서버에 잠시 문제가 생겼어요</div>
+        <p class="text-muted mb-4">예기치 못한 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.<br>문제가 지속되면 고객센터로 문의 부탁드립니다.</p>
+
+        <div th:if="${errorMessage}" class="error-detail">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            <span th:text="${errorMessage}">Error Message</span>
+        </div>
+
+        <a href="/" class="btn btn-sage">Wegive 홈으로 가기</a>
+    </div>
+</div>
+</body>
+</html>

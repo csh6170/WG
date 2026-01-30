@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>내 채팅 목록 - Wegive</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/header.css">
+
+    <style>
+        /* 🌿 테마 시스템 (item-detail.html과 동일) */
+        :root {
+            --sage-green: #5a8d7a;
+            --warm-coral: #ff7e67;
+            --cream-bg: #fdfcf9;
+            --text-main: #374151;
+        }
+
+        body {
+            background-color: var(--cream-bg);
+            padding-bottom: 100px;
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            color: var(--text-main);
+        }
+
+        /* 📍 메인 레이아웃 (1000px 중앙 정렬) */
+        .main-wrapper {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 채팅 리스트 컨테이너 (흰색 카드 디자인) */
+        .chat-list-container {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+
+        /* 리스트 헤더 */
+        .list-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #f0f0f0;
+            background-color: white;
+        }
+        .list-header h4 {
+            color: #2d4a3e; /* 짙은 녹색 텍스트 */
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        /* 채팅 아이템 */
+        .chat-item {
+            display: flex;
+            align-items: center;
+            padding: 20px 25px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+        .chat-item:hover {
+            background-color: #f8fafc; /* 마우스 올렸을 때 아주 연한 회색 */
+            transform: translateY(-2px);
+        }
+        .chat-item:last-child { border-bottom: none; }
+
+        /* 썸네일 이미지 */
+        .item-thumb {
+            width: 60px; height: 60px;
+            border-radius: 12px; /* 조금 더 둥글게 */
+            object-fit: cover;
+            background-color: #f0f0f0;
+            margin-right: 20px;
+            border: 1px solid #eee;
+        }
+
+        .chat-info { flex-grow: 1; min-width: 0; }
+
+        /* 물품명 배지 (테마 컬러 적용) */
+        .item-title-badge {
+            font-size: 0.75rem;
+            color: var(--sage-green);
+            background-color: #e8f3ef; /* 연한 세이지 배경 */
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .item-deleted-badge {
+            font-size: 0.75rem;
+            color: #999;
+            background-color: #eee;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        /* 대화 상대 이름 */
+        .partner-name {
+            font-weight: 800;
+            font-size: 1.05rem;
+            margin-bottom: 4px;
+            color: #2d4a3e;
+        }
+
+        /* 마지막 메시지 */
+        .last-message {
+            font-size: 0.95rem;
+            color: #6b7280;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 시간 및 상태 텍스트 */
+        .status-text {
+            font-size: 0.8rem;
+            color: var(--sage-green);
+            font-weight: 600;
+        }
+        .time-text {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+
+        /* 모바일 대응 */
+        @media (max-width: 768px) {
+            .main-wrapper { margin: 0; padding: 0; gap: 0; }
+            .chat-list-container { border-radius: 0; box-shadow: none; border: none; }
+            .chat-item { padding: 15px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div th:replace="~{fragments/header :: header}"></div>
+</div>
+
+<div class="main-wrapper">
+    <div class="chat-list-container">
+        <div class="list-header">
+            <h4>💬 대화 목록</h4>
+        </div>
+
+        <div th:if="${#lists.isEmpty(rooms)}" class="text-center p-5">
+            <div style="font-size: 4rem; margin-bottom: 15px;">📭</div>
+            <h5 class="fw-bold text-muted">참여 중인 대화가 없습니다.</h5>
+            <p class="text-muted small">이웃들과 따뜻한 나눔을 시작해보세요!</p>
+        </div>
+
+        <a th:each="room : ${rooms}" th:href="@{/chat/room/{id}(id=${room.roomId})}" class="chat-item">
+
+            <th:block th:if="${room.item != null and room.item.status != 'DELETE'}">
+                <img th:if="${#lists.isEmpty(room.item.itemImages)}"
+                     src="https://dummyimage.com/100x100/f0f0f0/999999.png?text=No+Image" class="item-thumb">
+                <img th:unless="${#lists.isEmpty(room.item.itemImages)}"
+                     th:src="|/images/${room.item.itemImages[0].storedName}|" class="item-thumb">
+            </th:block>
+
+            <th:block th:if="${room.item == null or room.item.status == 'DELETE'}">
+                <img src="https://dummyimage.com/100x100/eeeeee/999999.png?text=Deleted" class="item-thumb">
+            </th:block>
+
+            <div class="chat-info">
+                <span th:if="${room.item != null and room.item.status != 'DELETE'}"
+                      class="item-title-badge" th:text="${room.item.title}">물품명</span>
+
+                <span th:if="${room.item == null or room.item.status == 'DELETE'}"
+                      class="item-deleted-badge">삭제된 상품</span>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="partner-name">
+                        <span th:if="${room.seller.userId == myUserId}" th:text="${room.buyer.nickname}">나눔 받는이</span>
+                        <span th:if="${room.buyer.userId == myUserId}" th:text="${room.seller.nickname}">나눔이</span>
+
+                        <span th:if="${room.unreadCount > 0}" class="badge rounded-pill bg-danger ms-1"
+                              style="font-size: 0.7rem; padding: 0.3em 0.6em; vertical-align: middle;">
+                            [[${room.unreadCount}]]
+                        </span>
+                    </span>
+
+                    <small class="status-text"
+                           th:text="${(room.item == null or room.item.status == 'COMPLETED' or room.item.status == 'DELETE') ? '대화 종료' : '대화중'}"
+                           th:style="${(room.item == null or room.item.status == 'COMPLETED' or room.item.status == 'DELETE') ? 'color: #999;' : ''}">
+                        대화중
+                    </small>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="last-message text-truncate" style="max-width: 70%;"
+                         th:text="${room.lastMessage}">
+                        대화 내용
+                    </div>
+
+                    <small class="time-text ms-2" style="white-space: nowrap;"
+                           th:text="${#temporals.format(room.lastTime, T(java.time.LocalDate).now().isEqual(room.lastTime.toLocalDate()) ? 'HH:mm' : 'MM-dd')}">
+                        시간
+                    </small>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+</body>
+</html>

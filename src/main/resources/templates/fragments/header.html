@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+</head>
+
+<div th:fragment="header">
+    <div class="d-flex justify-content-between align-items-center mb-4 pt-3 pb-3" style="border-bottom: 1px solid #f0f5f2;">
+        <a href="/" class="d-flex align-items-center text-decoration-none" title="Wegive 홈으로" style="width: fit-content;">
+            <svg width="150" height="45" viewBox="0 0 150 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g transform="translate(0, 2)"> <path d="M25 12C25 12 28 2 38 2C48 2 48 12 48 12C48 12 48 22 38 22C34 22 30 20 28 17L25 35" stroke="#5a8d7a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M28 17C28 17 32 12 38 12" stroke="#5a8d7a" stroke-width="2" stroke-linecap="round"/>
+                </g>
+
+                <text x="55" y="33" font-family="'Pretendard', sans-serif" font-weight="700" font-size="28" fill="#5a8d7a" letter-spacing="-1.5">Wegive</text>
+            </svg>
+        </a>
+
+        <div th:if="${session.userId == null}">
+            <button type="button" class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#loginModal"
+                    style="background-color: #5a8d7a; border: none; border-radius: 20px; padding: 8px 22px; font-weight: 600;">
+                로그인
+            </button>
+        </div>
+
+        <div th:if="${session.userId != null}" class="d-flex align-items-center gap-4">
+            <a href="/chat/list" class="text-decoration-none text-secondary position-relative" title="채팅 목록" onclick="clearBadge()">
+                <i class="bi bi-chat-dots-fill fs-5" style="color: #5a8d7a;"></i>
+
+                <span id="chatBadge" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+                      style="display: none; width: 10px; height: 10px;">
+                    <span class="visually-hidden">New alerts</span>
+                </span>
+            </a>
+
+            <a href="/mypage" class="text-decoration-none">
+                <span class="fw-bold text-dark"><i class="bi bi-person-circle" style="color: #5a8d7a;"></i> <span th:text="${session.nickname}">사용자</span>님</span>
+            </a>
+            <a href="javascript:logoutConfirm()" class="text-muted small text-decoration-none" style="font-size: 0.85rem;">로그아웃</a>
+        </div>
+    </div>
+
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
+            <div class="modal-content p-4" style="border-radius: 2rem; border: none; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
+                <div class="modal-header justify-content-center border-0 pb-0">
+                    <h4 class="fw-bold" style="color: #2d4a3e; font-size: 1.4rem;">Wegive 로그인</h4>
+                </div>
+                <div class="modal-body px-3">
+                    <div class="text-center mb-4 mt-3">
+                        <h5 class="fw-bold mb-2" style="font-size: 1.15rem; color: #ff7e67;">반가워요, 이웃님! 👋</h5>
+                        <p class="text-muted small m-0" style="line-height: 1.6;">가까운 이웃과의 안전한 나눔을 위해<br>로그인을 부탁드려요.</p>
+                    </div>
+                    <div class="d-flex justify-content-center gap-3 mb-4">
+                        <a href="javascript:kakaoLogin()" class="btn-circle-social" title="카카오 로그인"
+                           style="width: 54px; height: 54px; border-radius: 50%; background-color: #FEE500; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.08); transition: transform 0.2s;">
+                            <svg viewBox="0 0 24 24" style="width: 26px; height: 26px;" fill="#3C1E1E"><path d="M12 3C7.58 3 4 5.79 4 9.24c0 2.16 1.43 4.07 3.63 5.17-.16.59-.58 2.14-.66 2.47-.09.38.14.37.29.25l3.29-2.2c.47.07.96.1 1.45.1 4.42 0 8-2.79 8-6.24S16.42 3 12 3z"/></svg>
+                        </a>
+                        <a href="javascript:naverLogin()" class="btn-circle-social" title="네이버 로그인"
+                           style="width: 54px; height: 54px; border-radius: 50%; background-color: #03C75A; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.08); transition: transform 0.2s;">
+                            <svg viewBox="0 0 24 24" style="width: 22px; height: 22px;" fill="#FFFFFF"><path d="M16.273 12.845L7.376 0H0v24h7.726V11.156L16.624 24H24V0h-7.727v12.845z"/></svg>
+                        </a>
+                        <a href="javascript:googleLogin()" class="btn-circle-social" title="구글 로그인"
+                           style="width: 54px; height: 54px; border-radius: 50%; background-color: #FFFFFF; border: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.08); transition: transform 0.2s;">
+                            <svg viewBox="0 0 24 24" style="width: 26px; height: 26px;"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="text-center pb-2">
+                    <button type="button" class="btn btn-link text-muted text-decoration-none btn-sm" data-bs-dismiss="modal" style="font-size: 0.8rem;">다음에 할게요</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+    <script th:inline="javascript">
+        // --- [로그인/로그아웃 로직] ---
+        const KAKAO_CLIENT_ID = "${YOUR_KAKAO_CLIENT_ID}";
+        const NAVER_CLIENT_ID = "${YOUR_NAVER_CLIENT_ID}";
+        const GOOGLE_CLIENT_ID = "${YOUR_GOOGLE_CLIENT_ID}";
+        const REDIRECT_URI_BASE = "${YOUR_REDIRECT_URI}";
+
+        function kakaoLogin() { location.href = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${REDIRECT_URI_BASE}/kakao&response_type=code`; }
+        function naverLogin() {
+            const state = Math.random().toString(36).substring(7);
+            location.href = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${NAVER_CLIENT_ID}&redirect_uri=${REDIRECT_URI_BASE}/naver&state=${state}`;
+        }
+        function googleLogin() { location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${REDIRECT_URI_BASE}/google&response_type=code&scope=email%20profile`; }
+
+        function logoutConfirm() {
+            Swal.fire({
+                title: '로그아웃 하시겠습니까?',
+                text: '다음에 또 따뜻한 나눔 하러 오세요! 🌿',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#5a8d7a',
+                cancelButtonColor: '#ff7e67',
+                confirmButtonText: '네, 로그아웃',
+                cancelButtonText: '취소',
+                borderRadius: '1.5rem'
+            }).then((result) => { if (result.isConfirmed) { location.href = '/logout'; } });
+        }
+
+        // --- [실시간 알림 및 빨간 점(Badge) 로직] ---
+        const loginUserId = [[${session.userId}]];
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // 페이지 로드 시, 저장된 알림 상태 확인해서 빨간 점 표시
+            checkBadgeState();
+        });
+
+        if (loginUserId) {
+            const socket = new SockJS('/ws-stomp');
+            const stompClient = Stomp.over(socket);
+            stompClient.debug = null;
+
+            stompClient.connect({}, function (frame) {
+                stompClient.subscribe('/sub/user/' + loginUserId + '/noti', function (message) {
+                    const noti = JSON.parse(message.body);
+
+                    // 1. 빨간 점 켜기 (및 저장)
+                    showBadge();
+
+                    // --- 채팅 목록 실시간 업데이트 ---
+                    const chatListContainer = document.querySelector('.chat-list-container');
+                    if (chatListContainer) {
+                        const roomId = noti.roomId;
+                        const roomItem = document.querySelector(`a[href*="/chat/room/${roomId}"]`);
+
+                        if (roomItem) {
+                            // 1. 안 읽은 개수 배지 업데이트
+                            const partnerNameArea = roomItem.querySelector('.partner-name');
+                            let badge = partnerNameArea.querySelector('.badge');
+
+                            if (badge) {
+                                const currentCount = parseInt(badge.innerText.trim()) || 0;
+                                badge.innerText = currentCount + 1;
+                            } else {
+                                const newBadge = document.createElement('span');
+                                newBadge.className = 'badge rounded-pill bg-danger ms-1';
+                                newBadge.style.cssText = 'font-size: 0.7rem; padding: 0.3em 0.6em; vertical-align: middle;';
+                                newBadge.innerText = '1';
+                                partnerNameArea.appendChild(newBadge);
+                            }
+
+                            // 2. 마지막 메시지 내용 및 시간 실시간 변경
+                            const lastMsgDiv = roomItem.querySelector('.last-message');
+                            if (lastMsgDiv) lastMsgDiv.innerText = noti.message;
+
+                            const timeText = roomItem.querySelector('.time-text');
+                            if (timeText) {
+                                const now = new Date();
+                                timeText.innerText = now.getHours().toString().padStart(2, '0') + ':' +
+                                                   now.getMinutes().toString().padStart(2, '0');
+                            }
+
+                            // 3. 🔴 위치 이동: "대화 목록" 헤더 바로 뒤로 배치
+                            const listHeader = chatListContainer.querySelector('.list-header');
+                            if (listHeader) {
+                                listHeader.after(roomItem); // 헤더(제목)는 유지하고 그 다음 칸에 삽입
+                            } else {
+                                chatListContainer.prepend(roomItem); // 헤더가 없으면 맨 위로
+                            }
+                        }
+                    }
+                    // ------------------------------------------
+
+                    // 2. 토스트 알림 표시
+                    Swal.fire({
+                        title: '💌 새 메시지가 도착했습니다!',
+                        icon: 'info',
+                        toast: true,
+                        position: 'bottom-end',
+                        showConfirmButton: true,
+                        confirmButtonText: '확인',
+                        showCancelButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            clearBadge();
+                            location.href = '/chat/list';
+                        }
+                    });
+                });
+            });
+        }
+
+        // 🔴 배지 활성화 함수
+        function showBadge() {
+            const badge = document.getElementById('chatBadge');
+            if(badge) {
+                badge.style.display = 'inline-block';
+                localStorage.setItem('hasUnreadChat', 'true'); // 상태 저장
+            }
+        }
+
+        // ⚪ 배지 삭제 함수 (아이콘 클릭 시 실행)
+        function clearBadge() {
+            const badge = document.getElementById('chatBadge');
+            if(badge) {
+                badge.style.display = 'none';
+                localStorage.removeItem('hasUnreadChat'); // 상태 삭제
+            }
+        }
+
+        // 🔄 페이지 로드 시 배지 상태 복구 함수
+        function checkBadgeState() {
+            const hasUnread = localStorage.getItem('hasUnreadChat');
+            if (hasUnread === 'true') {
+                const badge = document.getElementById('chatBadge');
+                if(badge) badge.style.display = 'inline-block';
+            }
+        }
+    </script>
+</div>
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>신고 관리 - Wegive 관리자</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* 🌿 Wegive 테마 시스템 */
+        :root {
+            --sage-green: #5a8d7a;
+            --sage-dark: #4a7565;
+            --soft-sage: #e8f3ef;
+            --warm-coral: #ff7e67;
+            --cream-bg: #fdfcf9;
+            --text-main: #374151;
+        }
+
+        body {
+            background-color: var(--cream-bg);
+            color: var(--text-main);
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            margin: 0;
+            padding-bottom: 50px;
+        }
+
+        /* 📍 main-wrapper (1000px) 적용 */
+        .main-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 상단 네비게이션 (일관성 유지) */
+        .admin-nav {
+            background-color: white;
+            border-radius: 1.5rem;
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            border: 1px solid var(--soft-sage);
+        }
+
+        .admin-nav a {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            color: var(--text-main);
+            text-decoration: none;
+            border-radius: 1rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .admin-nav a:hover {
+            background-color: var(--soft-sage);
+            color: var(--sage-green);
+        }
+
+        .admin-nav a.active {
+            background-color: var(--sage-green);
+            color: white;
+        }
+
+        /* 테이블 및 컨테이너 디자인 */
+        .table-container {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            border: 1px solid rgba(90, 141, 122, 0.05);
+        }
+
+        .table thead th {
+            background-color: var(--soft-sage);
+            color: var(--sage-dark);
+            border: none;
+            font-weight: 700;
+            padding: 15px;
+        }
+
+        .table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        h3 {
+            font-weight: 800;
+            color: var(--sage-green);
+            margin-top: 50px;
+            margin-bottom: 25px;
+        }
+
+        /* 버튼 및 배지 커스텀 */
+        .badge { padding: 6px 12px; border-radius: 8px; font-weight: 700; }
+        .bg-pending { background-color: #fef3c7; color: #92400e; } /* 대기중 - 노란색 계열 */
+        .bg-processed { background-color: var(--soft-sage); color: var(--sage-dark); } /* 완료 - 세이지 계열 */
+
+        .btn-ban {
+            background-color: var(--warm-coral);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            padding: 5px 12px;
+        }
+        .btn-ban:hover { background-color: #e66d58; color: white; }
+
+        .btn-reject {
+            background-color: white;
+            color: var(--text-main);
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-weight: 600;
+            padding: 5px 12px;
+        }
+        .btn-reject:hover { background-color: #f8f9fa; }
+
+        .btn-exit {
+            color: var(--warm-coral);
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center; gap: 5px;
+        }
+
+        .report-desc {
+            font-size: 0.85rem;
+            color: #666;
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <h3>🚨 신고 내역 관리</h3>
+        <a href="/" class="btn-exit mb-3"><i class="bi bi-box-arrow-left"></i> 사이트로 나가기</a>
+    </div>
+
+    <div class="admin-nav">
+        <a href="/admin"><i class="bi bi-speedometer2"></i> 대시보드</a>
+        <a href="/admin/users"><i class="bi bi-people-fill"></i> 회원 관리</a>
+        <a href="/admin/items"><i class="bi bi-box-seam-fill"></i> 상품 관리</a>
+        <a href="/admin/reports" class="active"><i class="bi bi-exclamation-triangle-fill"></i> 신고 관리</a>
+    </div>
+
+    <div class="table-container">
+        <table class="table table-hover align-middle">
+            <thead>
+            <tr>
+                <th>No</th>
+                <th>신고자</th>
+                <th>피신고자</th>
+                <th>신고 사유</th>
+                <th>상태</th>
+                <th>신고일</th>
+                <th>관리</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="report : ${reports}">
+                <td th:text="${report.reportId}" class="text-muted small">1</td>
+                <td>
+                    <span class="fw-bold" th:text="${report.reporter.nickname}">신고자</span>
+                </td>
+                <td>
+                    <span class="text-danger fw-bold" th:text="${report.reported.nickname}">피신고자</span>
+                </td>
+                <td>
+                    <div class="fw-bold" th:text="${report.reason}">사유</div>
+                    <div class="report-desc" th:text="${report.description}">상세내용</div>
+                </td>
+                <td>
+                    <span th:if="${report.status == 'PENDING'}" class="badge bg-pending">접수대기</span>
+                    <span th:if="${report.status == 'PROCESSED'}" class="badge bg-processed">처리완료</span>
+                </td>
+                <td class="small text-muted" th:text="${#temporals.format(report.createdAt, 'MM-dd HH:mm')}">12-30 14:00</td>
+                <td>
+                    <div th:if="${report.status == 'PENDING'}" class="d-flex gap-2">
+                        <button class="btn-ban btn-sm" th:onclick="|banUser(${report.reportId})|">정지</button>
+                        <button class="btn-reject btn-sm" th:onclick="|rejectReport(this)|" th:data-report-id="${report.reportId}">반려</button>
+                    </div>
+                    <span th:if="${report.status == 'PROCESSED'}" class="text-muted small">
+                        <i class="bi bi-check-circle-fill"></i> <span th:text="${report.processResult}">BANNED</span>
+                    </span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    /* 기존 자바스크립트 로직 유지 및 스타일 커스텀 */
+
+    function banUser(reportId) {
+        Swal.fire({
+            title: '유저를 정지 처리하시겠습니까?',
+            text: "신고 내용에 따라 해당 유저의 활동이 즉시 중단됩니다.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ff7e67', /* 웜 코랄 */
+            confirmButtonText: '네, 정지합니다',
+            cancelButtonText: '취소'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/admin/reports/${reportId}/ban`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(res => res.ok ? res.text() : Promise.reject())
+                .then(msg => {
+                    Swal.fire({
+                        title: '처리 완료',
+                        text: msg,
+                        icon: 'success',
+                        confirmButtonColor: '#5a8d7a' /* 세이지 그린 */
+                    }).then(() => location.reload());
+                })
+                .catch(() => Swal.fire('오류', '처리 중 문제가 발생했습니다.', 'error'));
+            }
+        });
+    }
+
+    function rejectReport(button) {
+        const reportId = button.getAttribute('data-report-id');
+
+        Swal.fire({
+            title: '신고를 반려하시겠습니까?',
+            text: "신고자에게 반려 알림이 전송됩니다.",
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonColor: '#5a8d7a',
+            confirmButtonText: '반려 처리',
+            cancelButtonText: '취소'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/admin/reports/${reportId}/reject`, { method: 'POST' })
+                .then(res => {
+                    if(res.ok) {
+                        Swal.fire('완료', '반려 처리되었습니다.', 'success').then(() => location.reload());
+                    } else {
+                        throw new Error();
+                    }
+                })
+                .catch(() => Swal.fire('실패', '이미 처리되었거나 오류가 발생했습니다.', 'error'));
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,54 @@
+/* 1. 새로운 테마 적용 (세이지 그린 & 부드러운 디자인) */
+.header-container { padding: 20px 0; border-bottom: 1px solid #f0f0f0; background: #fff; }
+
+.brand-logo {
+    color: #5a8d7a !important; /* 세이지 그린 */
+    font-family: 'Pretendard', sans-serif;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+}
+
+.btn-login {
+    background-color: #5a8d7a !important;
+    border: none !important;
+    border-radius: 20px !important;
+    padding: 8px 22px !important;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(90, 141, 122, 0.2);
+    color: white !important;
+}
+.btn-login:hover { background-color: #4a7565 !important; }
+
+/* 2. 기존 모달 디자인 유지 및 강화 */
+.modal-content {
+    border-radius: 1.5rem;
+    border: none;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* 3. 기존 소셜 버튼 스타일 (이 부분은 지우지 말고 유지하세요!) */
+.social-buttons-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.btn-circle-social {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+    cursor: pointer;
+}
+.btn-circle-social:hover { transform: scale(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+
+.kakao-circle { background-color: #FEE500; }
+.naver-circle { background-color: #03C75A; }
+.google-circle { background-color: #FFFFFF; border: 1px solid #e5e7eb; }
+.icon-svg { width: 26px; height: 26px; }

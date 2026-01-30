@@ -1,0 +1,112 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '4.0.1'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com'
+version = '0.0.1-SNAPSHOT'
+description = 'Demo project for Spring Boot'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(25)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+
+    // ==========================================
+    // 1. 웹 프레임워크 (API, 서버, MVC)
+    // ==========================================
+    // Spring MVC + REST API + 내장 Tomcat
+    // ※ starter-web 안에 webmvc가 이미 포함되어 있음
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // ❌ 중복이므로 제거
+    // implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+
+
+    // ==========================================
+    // 2. 데이터베이스 (DB 연결 및 ORM)
+    // ==========================================
+    // JPA + Hibernate + EntityManager
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Oracle JDBC Driver (실행 시 필요)
+    runtimeOnly 'com.oracle.database.jdbc:ojdbc11'
+
+
+    // ==========================================
+    // 3. 유틸리티 및 도구
+    // ==========================================
+    // Lombok (컴파일 시점에만 필요)
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Bean Validation (@NotNull, @Size 등)
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+
+    // ==========================================
+    // 4. 템플릿 엔진
+    // ==========================================
+    // Thymeleaf (서버 사이드 렌더링)
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+
+    // ==========================================
+    // 5. 실시간 통신
+    // ==========================================
+    // WebSocket (채팅, 실시간 알림 등)
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+
+    // ==========================================
+    // 6. JSON 처리
+    // ==========================================
+    // Jackson (starter-web에 포함되어 있지만 명시해도 무방)
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+
+    // ==========================================
+    // 7. 테스트 (🔥 핵심 수정 부분)
+    // ==========================================
+    // ❌ 존재하지 않거나 충돌 유발 → 제거
+    // testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+    // testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
+    // testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+
+    // ✅ Spring Boot 공식 통합 테스트 스타터
+    // 포함 내용:
+    // - JUnit 5
+    // - Mockito
+    // - Spring Test
+    // - MockMvc
+    // - JSON 테스트 도구
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // JUnit 실행기 (IDE/Gradle에서 테스트 실행용)
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // [추가] 스프링 시큐리티 (보안 표준)
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // [추가] 타임리프에서 시큐리티 기능 사용 (예: sec:authorize="isAuthenticated()")
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+}
+
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

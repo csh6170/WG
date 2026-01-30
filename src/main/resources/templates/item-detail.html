@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상품 상세 - Wegive</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/header.css">
+
+    <style>
+        :root {
+            --sage-green: #5a8d7a;
+            --warm-coral: #ff7e67;
+            --cream-bg: #fdfcf9;
+        }
+
+        body { background-color: var(--cream-bg); padding-bottom: 100px; font-family: 'Pretendard', sans-serif; }
+
+        .main-wrapper {
+            max-width: 1000px;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        #imageCarousel {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            background: #fff;
+        }
+        .carousel-item img { height: 500px; object-fit: contain; background: #2d2d2d; }
+
+        @media (max-width: 768px) {
+            .main-wrapper { margin: 0; gap: 0; }
+            #imageCarousel { border-radius: 0; }
+            .carousel-item img { height: 400px; }
+            .content-section, .profile-section { border-radius: 0; border-top: 1px solid #f0f0f0; }
+        }
+
+        .profile-section, .content-section {
+            background: #fff;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+
+        .profile-img { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; margin-right: 15px; border: 1px solid #f0f0f0; }
+
+        .manner-temp-container { text-align: right; min-width: 100px; }
+        .temp-text { font-size: 1.1rem; font-weight: 800; margin-bottom: 2px; display: block; color: var(--sage-green); }
+        .temp-bar-bg { width: 80px; height: 6px; background: #eee; border-radius: 10px; margin-left: auto; overflow: hidden; }
+        .temp-bar-fill { height: 100%; background: var(--sage-green); transition: width 0.6s ease; }
+
+        .temp-hot { color: #ff4d4d; } .bg-hot { background: #ff4d4d; }
+        .temp-warm { color: var(--sage-green); } .bg-warm { background: var(--sage-green); }
+        .temp-normal { color: #ffc107; } .bg-normal { background: #ffc107; }
+        .temp-cold { color: #6c757d; } .bg-cold { background: #6c757d; }
+
+        .bottom-bar {
+            position: fixed; bottom: 20px; left: 50%;
+            transform: translateX(-50%);
+            width: 95%; max-width: 1000px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            padding: 15px 30px;
+            border-radius: 25px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        @media (max-width: 768px) {
+            .bottom-bar { bottom: 0; width: 100%; border-radius: 0; padding: 15px 20px; }
+        }
+
+        .btn-coral { background-color: var(--warm-coral); border: none; color: white; border-radius: 12px; font-weight: bold; }
+
+        .status-select-custom {
+            border-radius: 10px; border: 2px solid var(--sage-green);
+            color: var(--sage-green); font-size: 0.85rem; padding: 5px 10px; width: 110px;
+            font-weight: bold; background-color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div th:replace="~{fragments/header :: header}"></div>
+</div>
+
+<div class="main-wrapper">
+    <div id="imageCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner" id="carouselInner"></div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#imageCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
+        <button class="carousel-control-next" type="button" data-bs-target="#imageCarousel" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
+    </div>
+
+    <div class="profile-section d-flex align-items-center">
+        <img src="/images/default_profile.png" id="sellerProfileImg" class="profile-img">
+        <div class="flex-grow-1">
+            <h5 class="m-0 fw-bold" id="sellerNickname">로딩중...</h5>
+            <small class="text-muted"><i class="bi bi-geo-alt-fill" style="color: var(--sage-green);"></i> <span id="addressName">주소 로딩중...</span></small>
+        </div>
+        <div class="manner-temp-container">
+            <span id="tempValue" class="temp-text">--.-℃</span>
+            <div class="temp-bar-bg">
+                <div id="tempBar" class="temp-bar-fill" style="width: 0%;"></div>
+            </div>
+            <button id="reportBtn" style="display: none;" class="btn btn-sm btn-link text-danger text-decoration-none p-0 mt-1" onclick="openReportModal()">신고</button>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <span class="badge mb-2" id="category" style="background-color: #e8f3ef; color: var(--sage-green); border-radius: 8px; padding: 6px 12px;">카테고리</span>
+        <h2 class="fw-bold mb-3" id="title" style="color: #2d4a3e;">제목 로딩중...</h2>
+        <p id="description" class="mt-4" style="white-space: pre-line; color: #4b5563; line-height: 1.8; font-size: 1.1rem;">내용 로딩중...</p>
+        <div class="text-muted mt-5 pt-4 border-top small d-flex gap-3">
+            <span>조회 <span id="viewCount" class="fw-bold">0</span></span>
+            <span>찜 <span id="likeCount" class="fw-bold">0</span></span>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<div class="bottom-bar">
+    <div class="d-flex align-items-center gap-3">
+        <button type="button" class="btn border-0 p-0" onclick="toggleWish()">
+            <i id="wishIcon" class="bi bi-heart" style="font-size: 1.8rem; color: var(--warm-coral);"></i>
+        </button>
+        <div class="vr"></div>
+        <span class="fw-bold fs-4" style="color: var(--sage-green);">무료나눔</span>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+        <div id="ownerButtons" style="display: none;" class="gap-2">
+            <select id="statusSelect" class="form-select form-select-sm status-select-custom" onchange="changeStatus()">
+                <option value="AVAILABLE">나눔중</option>
+                <option value="RESERVED">예약중</option>
+                <option value="COMPLETED">나눔완료</option>
+            </select>
+            <a id="editBtn" href="#" class="btn btn-outline-secondary btn-sm px-3 fw-bold" style="border-radius: 10px;">수정</a>
+            <button id="deleteBtn" onclick="deleteItem()" class="btn btn-outline-danger btn-sm px-3 fw-bold" style="border-radius: 10px;">삭제</button>
+        </div>
+
+        <form id="chatForm" action="/chat/room" method="post" style="margin:0; display:none;">
+            <input type="hidden" name="itemId" th:value="${itemId}">
+        </form>
+        <button id="chatBtn" type="button" class="btn btn-coral px-4 py-2 fw-bold" onclick="startChat()">채팅하기</button>
+    </div>
+</div>
+
+<div class="modal fade" id="reportModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 20px; border: none;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="fw-bold text-danger">🚨 게시글 신고하기</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="reportForm">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">신고 사유</label>
+                        <select id="reportReason" class="form-select" style="border-radius: 10px;">
+                            <option value="FRAUD">사기 글이에요</option>
+                            <option value="ABUSIVE">욕설/비방을 해요</option>
+                            <option value="ADVERTISING">광고/홍보 글이에요</option>
+                            <option value="OTHER">기타</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">상세 내용</label>
+                        <textarea id="reportDescription" class="form-control" rows="4" placeholder="내용을 입력해주세요." style="border-radius: 10px;"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius: 10px;">취소</button>
+                <button type="button" class="btn btn-danger px-4" onclick="submitReport()" style="border-radius: 10px;">신고 접수</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    const Toast = Swal.mixin({
+        toast: true, position: 'top-end', showConfirmButton: false, timer: 1500, timerProgressBar: true
+    });
+
+    /*<![CDATA[*/
+    // ❌ [수정] const loginUserId 선언 삭제 (header.html에 이미 있음)
+    // const loginUserId = [[${session.userId}]];  <-- 이 줄 삭제됨
+
+    // loginUserId 변수는 header.html 스크립트에서 전역으로 선언되어 있으므로 바로 사용 가능합니다.
+    const itemId = [[${itemId}]];
+    /*]]>*/
+
+    document.addEventListener("DOMContentLoaded", () => {
+        fetch(`/api/items/${itemId}?userId=${loginUserId || 0}`)
+            .then(res => res.json())
+            .then(item => {
+                document.getElementById('title').innerText = item.title;
+                document.getElementById('description').innerText = item.description;
+                document.getElementById('category').innerText = item.category;
+                document.getElementById('addressName').innerText = item.addressName;
+                document.getElementById('viewCount').innerText = item.viewCount;
+                document.getElementById('likeCount').innerText = item.likeCount;
+                document.getElementById('sellerNickname').innerText = item.sellerNickname;
+                document.getElementById('reportSellerId').value = item.sellerId;
+
+                const profileImg = document.getElementById('sellerProfileImg');
+                profileImg.src = item.sellerProfileImage || '/images/default_profile.png';
+
+                const wishIcon = document.getElementById('wishIcon');
+                wishIcon.className = item.liked ? 'bi bi-heart-fill' : 'bi bi-heart';
+
+                const temp = item.sellerMannerTemp || 36.5;
+                const tempValue = document.getElementById('tempValue');
+                const tempBar = document.getElementById('tempBar');
+
+                tempValue.innerText = temp.toFixed(1) + "℃";
+                tempBar.style.width = Math.min(temp, 100) + "%";
+
+                if (temp >= 50) { tempValue.className = 'temp-text temp-hot'; tempBar.className = 'temp-bar-fill bg-hot'; }
+                else if (temp >= 36.5) { tempValue.className = 'temp-text temp-warm'; tempBar.className = 'temp-bar-fill bg-warm'; }
+                else if (temp >= 30) { tempValue.className = 'temp-text temp-normal'; tempBar.className = 'temp-bar-fill bg-normal'; }
+                else { tempValue.className = 'temp-text temp-cold'; tempBar.className = 'temp-bar-fill bg-cold'; }
+
+                if (loginUserId && loginUserId === item.sellerId) {
+                    const ownerButtons = document.getElementById('ownerButtons');
+                    const statusSelect = document.getElementById('statusSelect');
+                    const editBtn = document.getElementById('editBtn');
+                    const deleteBtn = document.getElementById('deleteBtn');
+
+                    ownerButtons.style.display = 'flex';
+                    document.getElementById('chatBtn').style.display = 'none';
+
+                    editBtn.href = `/items/${item.itemId}/edit`;
+                    statusSelect.value = item.status || 'AVAILABLE';
+
+                    if (item.status === 'COMPLETED') {
+                        statusSelect.disabled = true;
+                        statusSelect.classList.add('bg-light', 'text-muted');
+                        editBtn.classList.add('disabled');
+                        deleteBtn.disabled = true;
+                    }
+                } else {
+                    document.getElementById('chatForm').style.display = 'block';
+                    if (loginUserId) document.getElementById('reportBtn').style.display = 'inline-block';
+                }
+
+                const carouselInner = document.getElementById('carouselInner');
+                if (item.imageUrls && item.imageUrls.length > 0) {
+                    item.imageUrls.forEach((url, index) => {
+                        const activeClass = (index === 0) ? 'active' : '';
+                        carouselInner.insertAdjacentHTML('beforeend',
+                            `<div class="carousel-item ${activeClass}"><img src="/images/${url}" class="d-block w-100"></div>`);
+                    });
+                } else {
+                    carouselInner.innerHTML = '<div class="carousel-item active"><img src="https://dummyimage.com/600x400/f0f0f0/999999.png?text=No+Image" class="d-block w-100"></div>';
+                }
+            });
+    });
+
+    function toggleWish() {
+        if (!loginUserId) {
+            Swal.fire({ icon: 'warning', title: '로그인 필요', showCancelButton: true, confirmButtonText: '로그인', confirmButtonColor: '#5a8d7a' })
+            .then(res => { if(res.isConfirmed) new bootstrap.Modal(document.getElementById('loginModal')).show(); });
+            return;
+        }
+
+        fetch(`/api/items/${itemId}/like?userId=${loginUserId}`, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            const wishIcon = document.getElementById('wishIcon');
+            if (data.isLiked) {
+                wishIcon.className = 'bi bi-heart-fill';
+                Toast.fire({ icon: 'success', title: '찜 등록!' });
+            } else {
+                wishIcon.className = 'bi bi-heart';
+                Toast.fire({ icon: 'success', title: '찜 취소' });
+            }
+            document.getElementById('likeCount').innerText = data.likeCount;
+        });
+    }
+
+    function changeStatus() {
+        const status = document.getElementById('statusSelect').value;
+        if (status === 'COMPLETED') {
+            fetch(`/api/items/${itemId}/chat-partners`)
+            .then(res => res.json())
+            .then(partners => {
+                if (partners.length === 0) {
+                    Swal.fire('알림', '채팅한 이웃이 없어 나눔을 완료할 수 없습니다.', 'warning');
+                    document.getElementById('statusSelect').value = 'AVAILABLE';
+                    return;
+                }
+                const opt = {}; partners.forEach(u => opt[u.userId] = u.nickname);
+                Swal.fire({ title: '나눔 대상자 선택', input: 'radio', inputOptions: opt, showCancelButton: true, confirmButtonColor: '#5a8d7a' })
+                .then(res => {
+                    if(res.isConfirmed) requestStatusChange(itemId, 'COMPLETED', res.value);
+                    else document.getElementById('statusSelect').value = 'AVAILABLE';
+                });
+            });
+        } else { requestStatusChange(itemId, status, null); }
+    }
+
+    function requestStatusChange(id, s, b) {
+        let url = `/api/items/${id}/status?status=${s}`;
+        if(b) url += `&buyerId=${b}`;
+        fetch(url, { method: 'PATCH' }).then(res => { if(res.ok) Swal.fire('성공', '상태가 변경되었습니다.', 'success').then(() => location.reload()); });
+    }
+
+    function deleteItem() {
+        Swal.fire({
+            title: '정말 삭제할까요?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ff7e67',
+            confirmButtonText: '삭제'
+        }).then(res => {
+            if(res.isConfirmed) {
+                fetch(`/api/items/${itemId}`, { method: 'DELETE' })
+                .then(res => {
+                    if(res.ok) {
+                        Swal.fire('삭제 완료', '게시글이 정상적으로 삭제되었습니다.', 'success')
+                            .then(() => location.href = '/');
+                    } else {
+                        Swal.fire('실패', '삭제 중 오류가 발생했습니다.', 'error');
+                    }
+                });
+            }
+        });
+    }
+
+    function startChat() {
+        if (!loginUserId) {
+            Swal.fire({ icon: 'warning', title: '로그인 필요', text: '채팅하려면 로그인이 필요합니다.', showCancelButton: true, confirmButtonColor: '#5a8d7a', confirmButtonText: '로그인' })
+            .then(res => { if(res.isConfirmed) new bootstrap.Modal(document.getElementById('loginModal')).show(); });
+            return;
+        }
+        document.getElementById('chatForm').submit();
+    }
+
+    function openReportModal() { new bootstrap.Modal(document.getElementById('reportModal')).show(); }
+
+    function submitReport() {
+        const r = document.getElementById('reportReason').value;
+        const d = document.getElementById('reportDescription').value;
+        fetch(`/api/reports?userId=${loginUserId}`, {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ reportedUserId: document.getElementById('reportSellerId').value, itemId: itemId, reason: r, description: d })
+        }).then(res => { if(res.ok) Swal.fire('신고 접수', '정상 처리되었습니다.', 'success').then(() => location.reload()); });
+    }
+</script>
+
+<input type="hidden" id="reportSellerId" value="">
+<input type="hidden" id="itemId" th:value="${itemId}">
+
+</body>
+</html>

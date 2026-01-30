@@ -1,0 +1,62 @@
+spring:
+  # [새로 추가된 부분] 404 에러 핸들링 설정 (들여쓰기 주의!)
+  mvc:
+    throw-exception-if-no-handler-found: true # 핸들러가 없으면 404 대신 예외(NoHandlerFoundException) 발생
+  web:
+    resources:
+      add-mappings: false # 정적 리소스 자동 매핑 끄기 (주의: CSS 경로가 꼬일 수 있음)
+  # [1] 데이터베이스 연결 설정
+  datasource:
+    driver-class-name: oracle.jdbc.OracleDriver # Oracle DB와 연결하기 위한 JDBC 드라이버 지정
+    url: jdbc:oracle:thin:@localhost:1521:XE   # DB 접속 주소 (Local Oracle XE 버전)
+    username: ${YOUR_USERNAME}                 # DB 접속 계정명
+    password: ${YOUR_PASSWORD}                 # DB 접속 비밀번호
+
+  # [2] JPA 및 Hibernate(ORM) 설정
+  jpa:
+    hibernate:
+      ddl-auto: update      # 엔티티 변경 시 DB 테이블 구조를 자동으로 반영 (기존 데이터 유지하며 수정)
+    properties:
+      hibernate:
+        format_sql: true    # 콘솔에 출력되는 SQL을 보기 좋게 정렬
+        show_sql: true      # 실행되는 모든 SQL 쿼리를 콘솔창에 로그로 출력
+
+  # [3] 파일 업로드(Multipart) 설정
+  servlet:
+    multipart:
+      enabled: true            # 파일 업로드 기능 사용 여부 (true: 활성)
+      max-file-size: 100MB     # 파일 한 개당 허용되는 최대 용량
+      max-request-size: 100MB  # 한 번의 HTTP 요청에 담긴 전체 파일 + 데이터의 총 합계 용량
+
+  # [4] 타임리프 템플릿 엔진 설정
+  thymeleaf:
+    cache: false  # 캐시 사용 안 함 (HTML 수정 후 새로고침 시 즉시 반영되어 개발 시 유용)
+
+# [5] 서버(Tomcat) 상세 설정
+server:
+  tomcat:
+    # [핵심] 한 요청에 담길 수 있는 전체 데이터 조각(파일 + 텍스트) 개수 제한을 늘립니다.
+    max-part-count: 100
+    # 파라미터 개수 제한도 넉넉하게 늘려줍니다.
+    max-parameter-count: 5000
+    # 업로드 중 연결 해제 방지
+    max-swallow-size: 300MB
+
+# [6] 사용자 정의 설정 (애플리케이션에서 사용할 변수)
+file:
+  dir: G:/Project/wegive/wegive_uploads/  # 실제 업로드된 파일이 저장될 물리적 경로
+
+# [소셜 로그인 설정]
+kakao:
+  rest-api-key: ${YOUR_KAKAO_REST_API_KEY}
+  redirect-uri: ${YOUR_REDIRECT_URI}
+
+oauth:
+  naver:
+    client-id: ${YOUR_NAVER_CLIENT_ID}
+    client-secret: ${YOUR_NAVER_CLIENT_SECRET}
+    redirect-uri: ${YOUR_REDIRECT_URI}
+  google:
+    client-id: ${YOUR_GOOGLE_CLIENT_ID}
+    client-secret: ${YOUR_GOOGLE_CLIENT_SECRET}
+    redirect-uri: ${YOUR_REDIRECT_URI}
