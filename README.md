@@ -77,6 +77,22 @@
 
 ---
 
+## 💻 실행 화면 (Screenshots)
+
+| 메인 페이지 (홈) | 물품 등록 및 상세 페이지 |
+| :---: | :---: |
+| ![메인화면](./images/wg_main.png) <br> *무한 스크롤 기반의 실시간 나눔 목록* | <img src="./images/wg_form.png" width="33%" alt="등록페이지"> <img src="./images/wg_detail.png" width="33%" alt="상세페이지"> <br> *좌: 물품 등록페이지 / 우: 물품 상세 페이지* |
+
+| 실시간 채팅 (Chat) | 위치 기반 동네 인증 |
+| :---: | :---: |
+| ![실시간채팅](./images/wg_chat.png) <br> *STOMP 기반 실시간 메시지 및 거래 상태 연동* | ![위치기반 인증](./images/wg_location.png) <br> *Kakao Local API 활용 행정동 주소 변환(공용 PC로 인해 비활성화 이미지)* |
+
+| 마이페이지 (MyPage) | 관리자 대시보드 |
+| :---: | :---: |
+| ![마이페이지](./images/wg_mypage.png) <br> *나눔/받은 내역 및 매너 온도 확인* | ![관리자페이지](./images/wg_admin.png) <br> *신고 처리 및 전체 회원/물품 관리* |
+
+---
+
 ## 💡 Future Improvements (Reflections)
 
 프로젝트를 진행하며 아쉬웠던 점과 향후 보완 계획입니다.
