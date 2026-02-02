@@ -81,7 +81,7 @@
 
 | 메인 페이지 (홈) | 물품 등록 및 상세 페이지 |
 | :---: | :---: |
-| ![메인화면](./images/wg_main.png) <br> *무한 스크롤 기반의 실시간 나눔 목록* | <img src="./images/wg_form.png" width="33%" alt="등록페이지"> <img src="./images/wg_detail.png" width="33%" alt="상세페이지"> <br> *좌: 물품 등록페이지 / 우: 물품 상세 페이지* |
+| ![메인화면](./images/wg_main.png) <br> *무한 스크롤 기반의 실시간 나눔 목록* | <img src="./images/wg_form.png" width="49%" alt="등록페이지"> <img src="./images/wg_detail.png" width="49%" alt="상세페이지"> <br> *좌: 물품 등록페이지 / 우: 물품 상세 페이지* |
 
 | 실시간 채팅 (Chat) | 위치 기반 동네 인증 |
 | :---: | :---: |
