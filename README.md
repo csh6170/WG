@@ -270,7 +270,7 @@ HTML 파일 내 지도 API Key 교체가 필요합니다.
 - Kakao Maps SDK:
   ```YAML
   js:
-  kakao: YOUR_KEY
+     kakao: YOUR_KEY
   ```
 
 ### 3. Database Initialization
